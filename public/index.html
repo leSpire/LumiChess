@@ -64,6 +64,7 @@
           <span class="search__icon" aria-hidden="true">🔎</span>
           <input type="text" placeholder="Rechercher une leçon..." />
         </div>
+        <span class="session-badge glow" id="sessionBadge">Session</span>
         <button class="iconbtn glow" id="helpBtn" title="Aide">?</button>
       </header>
 
@@ -169,27 +170,11 @@
 
         <div class="account-grid">
           <article class="auth-panel glow" id="authPanel">
-            <h3>Connexion / inscription</h3>
-            <p class="muted">Version locale MVP — vos données sont stockées sur cet appareil.</p>
-            <form id="authForm" class="auth-form">
-              <div class="auth-row">
-                <label for="authPseudo">Pseudo</label>
-                <input id="authPseudo" required placeholder="ex: LumiMaster" />
-              </div>
-              <div class="auth-row">
-                <label for="authEmail">Email</label>
-                <input id="authEmail" type="email" required placeholder="ex: toi@mail.com" />
-              </div>
-              <div class="auth-row">
-                <label for="authPassword">Mot de passe</label>
-                <input id="authPassword" type="password" minlength="6" required placeholder="••••••" />
-              </div>
-              <div class="auth-actions">
-                <button class="btn primary glow" type="submit" data-mode="login">Connexion</button>
-                <button class="btn glow" type="button" id="registerBtn">Inscription</button>
-              </div>
-            </form>
-            <p class="muted" id="authStatus">Pas encore connecté.</p>
+            <h3>Accès au site</h3>
+            <p class="muted" id="authStatus">Vous êtes connecté. Utilisez ce bouton pour changer de mode d'accès.</p>
+            <div class="auth-actions stack">
+              <a class="btn glow" href="auth.html">Changer de compte / mode invité</a>
+            </div>
           </article>
 
           <article class="profile-panel glow" id="profilePanel">
