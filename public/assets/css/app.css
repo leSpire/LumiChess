@@ -732,7 +732,7 @@ body{
 }
 
 .board{
-  width: min(560px, 58vh);
+  width: min(760px, 78vh);
   aspect-ratio: 1/1;
   border-radius: 18px;
   overflow:hidden;
@@ -765,7 +765,9 @@ body{
   height: 100%;
   display:grid;
   place-items:center;
-  font-size: clamp(24px, 3.8vh, 40px);
+  font-size: clamp(34px, 6.2vmin, 58px);
+  line-height: 1;
+  font-family: "Segoe UI Symbol", "Noto Sans Symbols2", "Apple Symbols", system-ui, sans-serif;
   cursor: grab;
   transform: translateZ(0);
   will-change: transform;
@@ -1059,11 +1061,72 @@ body{
 }
 .beautiful-board .piece.w{
   color: rgba(255,255,255,.98);
-  text-shadow: 0 8px 18px rgba(0,0,0,.45), 0 0 15px rgba(255,255,255,.2);
+  text-shadow: 0 8px 18px rgba(0,0,0,.45), 0 0 15px rgba(255,255,255,.2), 0 1px 0 rgba(0,0,0,.45);
 }
 .beautiful-board .piece.b{
-  color: rgba(27,20,15,.95);
+  color: rgba(20,16,13,.96);
+  text-shadow: 0 1px 0 rgba(255,255,255,.35);
   filter: drop-shadow(0 10px 14px rgba(0,0,0,.4));
+}
+
+.sq .coord-file,
+.sq .coord-rank{
+  position:absolute;
+  z-index: 3;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  opacity: .8;
+  pointer-events:none;
+}
+.sq .coord-file{ right: 7px; bottom: 5px; }
+.sq .coord-rank{ left: 7px; top: 5px; }
+.sq.light .coord-file,
+.sq.light .coord-rank{ color: rgba(85,52,35,.72); }
+.sq.dark .coord-file,
+.sq.dark .coord-rank{ color: rgba(240,223,196,.78); }
+
+.coach-card{
+  margin-top: 12px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.03);
+  border-radius: 14px;
+  padding: 10px;
+}
+.coach-stats{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 8px 0 6px;
+}
+.coach-stat{
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  padding: 7px;
+  text-align:center;
+}
+.coach-stat span{
+  display:block;
+  font-size: 10px;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 2px;
+}
+.coach-stat strong{
+  font-size: 15px;
+  color: rgba(255,255,255,.88);
+}
+.coach-reward{
+  margin: 8px 0 2px;
+  color: rgba(202,160,122,.92);
+  font-weight: 600;
+}
+.coach-list{
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: rgba(255,255,255,.62);
+  line-height: 1.45;
+  font-size: 12px;
 }
 .miniDragGhost{
   position: fixed;
