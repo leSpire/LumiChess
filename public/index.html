@@ -159,6 +159,107 @@
         </div>
       </section>
 
+
+
+      <section class="section account" id="accountSection">
+        <div class="section__head">
+          <h2>Compte & profil joueur</h2>
+          <button class="link glow" id="logoutBtn">Se déconnecter</button>
+        </div>
+
+        <div class="account-grid">
+          <article class="auth-panel glow" id="authPanel">
+            <h3>Connexion / inscription</h3>
+            <p class="muted">Version locale MVP — vos données sont stockées sur cet appareil.</p>
+            <form id="authForm" class="auth-form">
+              <div class="auth-row">
+                <label for="authPseudo">Pseudo</label>
+                <input id="authPseudo" required placeholder="ex: LumiMaster" />
+              </div>
+              <div class="auth-row">
+                <label for="authEmail">Email</label>
+                <input id="authEmail" type="email" required placeholder="ex: toi@mail.com" />
+              </div>
+              <div class="auth-row">
+                <label for="authPassword">Mot de passe</label>
+                <input id="authPassword" type="password" minlength="6" required placeholder="••••••" />
+              </div>
+              <div class="auth-actions">
+                <button class="btn primary glow" type="submit" data-mode="login">Connexion</button>
+                <button class="btn glow" type="button" id="registerBtn">Inscription</button>
+              </div>
+            </form>
+            <p class="muted" id="authStatus">Pas encore connecté.</p>
+          </article>
+
+          <article class="profile-panel glow" id="profilePanel">
+            <div class="profile-head">
+              <div>
+                <h3 id="profileName">Profil joueur</h3>
+                <p class="muted" id="profileSub">Connectez-vous pour activer votre espace.</p>
+              </div>
+              <span class="pill">MVP local</span>
+            </div>
+            <form id="profileForm" class="auth-form">
+              <div class="auth-row">
+                <label for="profileTheme">Thème préféré</label>
+                <input id="profileTheme" placeholder="attaque sur le roi" />
+              </div>
+              <div class="auth-row">
+                <label for="profileWeakness">Thème faible principal</label>
+                <input id="profileWeakness" placeholder="finales de pions" />
+              </div>
+              <div class="auth-row">
+                <label for="profileBio">Bio rapide</label>
+                <input id="profileBio" placeholder="Joueur club, objectif 1800" />
+              </div>
+              <button class="btn glow" type="submit">Sauvegarder le profil</button>
+            </form>
+          </article>
+        </div>
+
+        <div class="stats-grid">
+          <article class="card glow stat-card">
+            <div class="card__label">Elo actuel</div>
+            <div class="card__big" id="eloNow">—</div>
+            <div class="card__muted" id="eloTrend">Connectez-vous</div>
+          </article>
+          <article class="card glow stat-card">
+            <div class="card__label">Précision moyenne</div>
+            <div class="card__big" id="accuracyNow">—</div>
+            <div class="card__muted">sur les 10 dernières sessions</div>
+          </article>
+          <article class="card glow stat-card">
+            <div class="card__label">Thèmes faibles</div>
+            <div class="card__big" id="weakThemes">—</div>
+            <div class="card__muted">à travailler cette semaine</div>
+          </article>
+        </div>
+
+        <div class="account-grid">
+          <article class="history-panel glow">
+            <h3>Historique de progression</h3>
+            <div id="historyList" class="history-list"></div>
+          </article>
+
+          <article class="goals-panel glow">
+            <h3>Objectifs personnels</h3>
+            <form id="goalForm" class="auth-form compact">
+              <div class="auth-row">
+                <label for="goalText">Objectif</label>
+                <input id="goalText" placeholder="+100 Elo en 3 mois" required />
+              </div>
+              <div class="auth-row">
+                <label for="goalDeadline">Échéance</label>
+                <input id="goalDeadline" type="date" required />
+              </div>
+              <button class="btn primary glow" type="submit">Ajouter l'objectif</button>
+            </form>
+            <div id="goalsList" class="goals-list"></div>
+          </article>
+        </div>
+      </section>
+
       <div class="overlay" id="overlay" aria-hidden="true">
         <div class="overlay__backdrop" data-close="1"></div>
 

@@ -1027,3 +1027,199 @@ renderMiniBoard();
 })();
 
 closeTutorial();
+
+const STORE_KEY = "lumichess-users-v1";
+const SESSION_KEY = "lumichess-session-v1";
+
+function readUsers() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); }
+  catch { return []; }
+}
+function saveUsers(users) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(users));
+}
+function getCurrentUser() {
+  const email = localStorage.getItem(SESSION_KEY);
+  if (!email) return null;
+  return readUsers().find((u) => u.email === email) || null;
+}
+function setCurrentUser(email) {
+  if (!email) localStorage.removeItem(SESSION_KEY);
+  else localStorage.setItem(SESSION_KEY, email);
+}
+function seedHistory() {
+  return [
+    { date: "Semaine 1", elo: 1180, accuracy: 67, focus: "ouvertures" },
+    { date: "Semaine 2", elo: 1215, accuracy: 71, focus: "tactiques" },
+    { date: "Semaine 3", elo: 1242, accuracy: 74, focus: "finales" },
+    { date: "Semaine 4", elo: 1270, accuracy: 78, focus: "stratégie" },
+  ];
+}
+function ensureProfile(user) {
+  user.profile ??= { theme: "", weakness: "", bio: "" };
+  user.history ??= seedHistory();
+  user.goals ??= [{ text: "+100 Elo en 3 mois", deadline: "", done: false }];
+  return user;
+}
+
+const authForm = $("#authForm");
+const registerBtn = $("#registerBtn");
+const authStatus = $("#authStatus");
+const logoutBtn = $("#logoutBtn");
+const profileForm = $("#profileForm");
+const goalForm = $("#goalForm");
+
+function updateDashboard() {
+  const user = getCurrentUser();
+  const profileName = $("#profileName");
+  const profileSub = $("#profileSub");
+
+  if (!user) {
+    profileName.textContent = "Profil joueur";
+    profileSub.textContent = "Connectez-vous pour activer votre espace.";
+    $("#eloNow").textContent = "—";
+    $("#accuracyNow").textContent = "—";
+    $("#weakThemes").textContent = "—";
+    $("#eloTrend").textContent = "Connectez-vous";
+    $("#historyList").innerHTML = '<div class="history-item">Aucun historique disponible.</div>';
+    $("#goalsList").innerHTML = '<div class="goal-item">Aucun objectif pour le moment.</div>';
+    authStatus.textContent = "Pas encore connecté.";
+    return;
+  }
+
+  const safeUser = ensureProfile(user);
+  const users = readUsers().map((u) => (u.email === safeUser.email ? safeUser : u));
+  saveUsers(users);
+
+  profileName.textContent = `Profil de ${safeUser.pseudo}`;
+  profileSub.textContent = safeUser.profile.bio || "Prêt pour grind votre prochain palier Elo.";
+  $("#profileTheme").value = safeUser.profile.theme;
+  $("#profileWeakness").value = safeUser.profile.weakness;
+  $("#profileBio").value = safeUser.profile.bio;
+
+  const last = safeUser.history[safeUser.history.length - 1];
+  const first = safeUser.history[0];
+  $("#eloNow").textContent = last ? last.elo : "—";
+  $("#accuracyNow").textContent = last ? `${last.accuracy}%` : "—";
+  $("#weakThemes").textContent = safeUser.profile.weakness || (last ? last.focus : "—");
+  $("#eloTrend").textContent = last && first ? `${last.elo - first.elo >= 0 ? "+" : ""}${last.elo - first.elo} Elo` : "Tendance indisponible";
+
+  $("#historyList").innerHTML = safeUser.history
+    .map((h) => `<div class="history-item"><b>${h.date}</b> · Elo ${h.elo} · Précision ${h.accuracy}% · Focus ${h.focus}</div>`)
+    .join("");
+
+  $("#goalsList").innerHTML = safeUser.goals.map((g, idx) => `
+    <label class="goal-item ${g.done ? "done" : ""}">
+      <div>
+        <strong>${g.text}</strong>
+        <small>Échéance: ${g.deadline || "à définir"}</small>
+      </div>
+      <input type="checkbox" data-goal-idx="${idx}" ${g.done ? "checked" : ""} />
+    </label>
+  `).join("") || '<div class="goal-item">Aucun objectif pour le moment.</div>';
+
+  authStatus.textContent = `Connecté en tant que ${safeUser.pseudo} (${safeUser.email})`;
+}
+
+authForm?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const pseudo = $("#authPseudo").value.trim();
+  const email = $("#authEmail").value.trim().toLowerCase();
+  const password = $("#authPassword").value;
+
+  const users = readUsers();
+  const found = users.find((u) => u.email === email);
+  if (!found || found.password !== password) {
+    authStatus.textContent = "Connexion refusée. Vérifiez vos identifiants.";
+    return;
+  }
+
+  setCurrentUser(email);
+  authStatus.textContent = `Bienvenue ${found.pseudo} 👑`;
+  updateDashboard();
+});
+
+registerBtn?.addEventListener("click", () => {
+  const pseudo = $("#authPseudo").value.trim();
+  const email = $("#authEmail").value.trim().toLowerCase();
+  const password = $("#authPassword").value;
+
+  if (!pseudo || !email || password.length < 6) {
+    authStatus.textContent = "Inscription: remplissez tous les champs (mot de passe ≥ 6).";
+    return;
+  }
+
+  const users = readUsers();
+  if (users.some((u) => u.email === email)) {
+    authStatus.textContent = "Cet email existe déjà.";
+    return;
+  }
+
+  users.push(ensureProfile({ pseudo, email, password }));
+  saveUsers(users);
+  setCurrentUser(email);
+  authStatus.textContent = "Inscription validée, vous êtes connecté.";
+  updateDashboard();
+});
+
+logoutBtn?.addEventListener("click", () => {
+  setCurrentUser(null);
+  updateDashboard();
+});
+
+profileForm?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const user = getCurrentUser();
+  if (!user) {
+    authStatus.textContent = "Connectez-vous pour modifier le profil.";
+    return;
+  }
+
+  const users = readUsers();
+  const idx = users.findIndex((u) => u.email === user.email);
+  if (idx === -1) return;
+
+  users[idx] = ensureProfile(users[idx]);
+  users[idx].profile.theme = $("#profileTheme").value.trim();
+  users[idx].profile.weakness = $("#profileWeakness").value.trim();
+  users[idx].profile.bio = $("#profileBio").value.trim();
+  saveUsers(users);
+  updateDashboard();
+  authStatus.textContent = "Profil sauvegardé.";
+});
+
+goalForm?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const text = $("#goalText").value.trim();
+  const deadline = $("#goalDeadline").value;
+  if (!text || !deadline) return;
+
+  const users = readUsers();
+  const idx = users.findIndex((u) => u.email === user.email);
+  users[idx] = ensureProfile(users[idx]);
+  users[idx].goals.unshift({ text, deadline, done: false });
+  saveUsers(users);
+  goalForm.reset();
+  updateDashboard();
+});
+
+$("#goalsList")?.addEventListener("change", (e) => {
+  const input = e.target.closest("input[data-goal-idx]");
+  if (!input) return;
+
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const users = readUsers();
+  const idx = users.findIndex((u) => u.email === user.email);
+  users[idx] = ensureProfile(users[idx]);
+  const goalIdx = Number.parseInt(input.dataset.goalIdx, 10);
+  if (users[idx].goals[goalIdx]) users[idx].goals[goalIdx].done = input.checked;
+  saveUsers(users);
+  updateDashboard();
+});
+
+updateDashboard();
