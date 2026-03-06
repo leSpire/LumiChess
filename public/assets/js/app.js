@@ -990,27 +990,94 @@ function moveGhost(x, y) {
   dragging.ghostEl.style.top = `${y}px`;
 }
 
+let miniState = startPosition();
+let miniSelectedSq = null;
+
+function setMiniStatus(message) {
+  const statusElMini = $("#miniBoardStatus");
+  if (statusElMini) statusElMini.textContent = message;
+}
+
+function clearMiniSelection() {
+  miniSelectedSq = null;
+}
+
 function renderMiniBoard() {
   const mini = $("#miniBoard");
+  if (!mini) return;
+
   mini.innerHTML = "";
-  const st = startPosition();
+
   for (let i = 0; i < 8; i += 1) {
     for (let j = 0; j < 8; j += 1) {
+      const sq = ijToSq(i, j);
+      const p = miniState.board[i][j];
       const dark = (i + j) % 2 === 1;
-      const cell = document.createElement("div");
-      cell.style.display = "grid";
-      cell.style.placeItems = "center";
-      cell.style.fontSize = "18px";
-      cell.style.background = dark ? "rgba(0,0,0,.20)" : "rgba(255,255,255,.06)";
-      const p = st.board[i][j];
-      if (p) {
-        cell.textContent = U[p] || "";
-        cell.style.opacity = "0.9";
+
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = `miniSq ${dark ? "dark" : "light"}`;
+      cell.dataset.sq = sq;
+      cell.setAttribute("aria-label", `Case ${sq}`);
+
+      if (miniSelectedSq === sq) {
+        cell.classList.add("is-selected");
       }
+
+      if (miniSelectedSq) {
+        const legalTargets = genLegalMoves(miniState, miniSelectedSq);
+        const m = legalTargets.find((mv) => mv.to === sq);
+        if (m) {
+          const targetPiece = pieceAt(miniState, sq);
+          cell.classList.add(targetPiece ? "is-capture" : "is-target");
+        }
+      }
+
+      if (p) {
+        const pe = document.createElement("span");
+        pe.className = `miniPiece ${colorOf(p) === "w" ? "w" : "b"}`;
+        pe.textContent = U[p] || "";
+        cell.appendChild(pe);
+      }
+
+      cell.addEventListener("click", () => onMiniSquareClick(sq));
       mini.appendChild(cell);
     }
   }
+
+  const turnLabel = miniState.turn === "w" ? "Trait aux blancs" : "Trait aux noirs";
+  setMiniStatus(miniSelectedSq ? `${turnLabel} · ${miniSelectedSq} sélectionnée` : turnLabel);
 }
+
+function onMiniSquareClick(sq) {
+  const p = pieceAt(miniState, sq);
+
+  if (miniSelectedSq && miniSelectedSq !== sq) {
+    const move = genLegalMoves(miniState, miniSelectedSq).find((m) => m.to === sq);
+    if (move) {
+      miniState = makeMove(miniState, { ...move });
+      clearMiniSelection();
+      renderMiniBoard();
+      return;
+    }
+  }
+
+  if (p && colorOf(p) === miniState.turn) {
+    miniSelectedSq = sq;
+  } else {
+    clearMiniSelection();
+  }
+
+  renderMiniBoard();
+}
+
+function resetMiniBoard() {
+  miniState = startPosition();
+  clearMiniSelection();
+  renderMiniBoard();
+}
+
+$("#miniBoardReset")?.addEventListener("click", resetMiniBoard);
 renderMiniBoard();
 
 (() => {
