@@ -1047,6 +1047,9 @@ function setCurrentUser(email) {
   if (!email) localStorage.removeItem(SESSION_KEY);
   else localStorage.setItem(SESSION_KEY, email);
 }
+function redirectToAuth() {
+  window.location.href = "auth.html";
+}
 function seedHistory() {
   return [
     { date: "Semaine 1", elo: 1180, accuracy: 67, focus: "ouvertures" },
@@ -1062,12 +1065,11 @@ function ensureProfile(user) {
   return user;
 }
 
-const authForm = $("#authForm");
-const registerBtn = $("#registerBtn");
 const authStatus = $("#authStatus");
 const logoutBtn = $("#logoutBtn");
 const profileForm = $("#profileForm");
 const goalForm = $("#goalForm");
+const sessionBadge = $("#sessionBadge");
 
 function updateDashboard() {
   const user = getCurrentUser();
@@ -1083,7 +1085,9 @@ function updateDashboard() {
     $("#eloTrend").textContent = "Connectez-vous";
     $("#historyList").innerHTML = '<div class="history-item">Aucun historique disponible.</div>';
     $("#goalsList").innerHTML = '<div class="goal-item">Aucun objectif pour le moment.</div>';
-    authStatus.textContent = "Pas encore connecté.";
+    if (authStatus) authStatus.textContent = "Veuillez choisir un mode d'accès.";
+    if (sessionBadge) sessionBadge.textContent = "Session inactive";
+    redirectToAuth();
     return;
   }
 
@@ -1118,53 +1122,16 @@ function updateDashboard() {
     </label>
   `).join("") || '<div class="goal-item">Aucun objectif pour le moment.</div>';
 
-  authStatus.textContent = `Connecté en tant que ${safeUser.pseudo} (${safeUser.email})`;
+  if (authStatus) authStatus.textContent = safeUser.isGuest
+    ? `Connecté en mode invité (${safeUser.pseudo})`
+    : `Connecté en tant que ${safeUser.pseudo} (${safeUser.email})`;
+  if (sessionBadge) sessionBadge.textContent = safeUser.isGuest ? `Invité: ${safeUser.pseudo}` : safeUser.pseudo;
 }
 
-authForm?.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const pseudo = $("#authPseudo").value.trim();
-  const email = $("#authEmail").value.trim().toLowerCase();
-  const password = $("#authPassword").value;
-
-  const users = readUsers();
-  const found = users.find((u) => u.email === email);
-  if (!found || found.password !== password) {
-    authStatus.textContent = "Connexion refusée. Vérifiez vos identifiants.";
-    return;
-  }
-
-  setCurrentUser(email);
-  authStatus.textContent = `Bienvenue ${found.pseudo} 👑`;
-  updateDashboard();
-});
-
-registerBtn?.addEventListener("click", () => {
-  const pseudo = $("#authPseudo").value.trim();
-  const email = $("#authEmail").value.trim().toLowerCase();
-  const password = $("#authPassword").value;
-
-  if (!pseudo || !email || password.length < 6) {
-    authStatus.textContent = "Inscription: remplissez tous les champs (mot de passe ≥ 6).";
-    return;
-  }
-
-  const users = readUsers();
-  if (users.some((u) => u.email === email)) {
-    authStatus.textContent = "Cet email existe déjà.";
-    return;
-  }
-
-  users.push(ensureProfile({ pseudo, email, password }));
-  saveUsers(users);
-  setCurrentUser(email);
-  authStatus.textContent = "Inscription validée, vous êtes connecté.";
-  updateDashboard();
-});
 
 logoutBtn?.addEventListener("click", () => {
   setCurrentUser(null);
-  updateDashboard();
+  redirectToAuth();
 });
 
 profileForm?.addEventListener("submit", (e) => {
