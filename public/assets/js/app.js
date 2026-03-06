@@ -539,6 +539,10 @@ const progressFill = $("#progressFill");
 const boardEl = $("#board");
 const toastEl = $("#toast");
 const globalToast = $("#globalToast");
+const xpPointsEl = $("#xpPoints");
+const streakCountEl = $("#streakCount");
+const chapterScoreEl = $("#chapterScore");
+const rewardTextEl = $("#rewardText");
 const tutorialPage = $("#tutorialPage");
 const isStandaloneTutorial = Boolean(tutorialPage);
 
@@ -562,6 +566,7 @@ let ctx = { clickedOnce: false };
 
 let selectedSq = null;
 let legalMovesFromSelected = [];
+let lastCompletedStep = null;
 
 function setStatus(msg, tone = "neutral") {
   statusEl.textContent = msg;
@@ -639,9 +644,30 @@ function initTutorial() {
   done = lessons.map(() => false);
   stepIndex = 0;
   freeMode = false;
+  lastCompletedStep = null;
   buildSteps();
   buildBoard();
   loadStep(0);
+}
+
+function updateCoachPanel() {
+  const completed = done.filter(Boolean).length;
+  const streak = done.slice(0, stepIndex + 1).filter(Boolean).length;
+  const xp = completed * 120;
+
+  if (xpPointsEl) xpPointsEl.textContent = String(xp);
+  if (streakCountEl) streakCountEl.textContent = String(streak);
+  if (chapterScoreEl) chapterScoreEl.textContent = `${completed}/${lessons.length}`;
+
+  if (!rewardTextEl) return;
+  const lessonLabel = lessons[lastCompletedStep]?.name || "";
+  if (lastCompletedStep !== null) {
+    rewardTextEl.textContent = `🎉 ${lessonLabel} validé : +120 XP ! Continue, tu progresses très vite.`;
+  } else if (completed > 0) {
+    rewardTextEl.textContent = `Super départ : ${completed} chapitre${completed > 1 ? "s" : ""} validé${completed > 1 ? "s" : ""}.`;
+  } else {
+    rewardTextEl.textContent = "Valide un chapitre pour gagner tes premiers points.";
+  }
 }
 
 function buildSteps() {
@@ -679,6 +705,7 @@ function syncStepsUI() {
   nextBtn.textContent = stepIndex === lessons.length - 1 ? "Terminer" : "Suivant";
 
   modeBtn.textContent = freeMode ? "Mode guidé" : "Mode libre";
+  updateCoachPanel();
 }
 
 function loadStep(i) {
@@ -686,7 +713,7 @@ function loadStep(i) {
   ctx = { clickedOnce: false };
 
   const lesson = lessons[i];
-  if (lesson.name === "Mode libre") freeMode = true;
+  freeMode = lesson.name === "Mode libre";
 
   stepTitle.textContent = lesson.name;
   stepText.textContent = lesson.text;
@@ -759,6 +786,20 @@ function buildBoard() {
       const cell = document.createElement("div");
       cell.className = `sq ${dark ? "dark" : "light"}`;
       cell.dataset.sq = sq;
+
+      if (i === 7) {
+        const file = document.createElement("span");
+        file.className = "coord-file";
+        file.textContent = FILES[j];
+        cell.appendChild(file);
+      }
+      if (j === 0) {
+        const rank = document.createElement("span");
+        rank.className = "coord-rank";
+        rank.textContent = String(8 - i);
+        cell.appendChild(rank);
+      }
+
       cell.addEventListener("click", () => onSquareClick(sq));
       boardEl.appendChild(cell);
     }
@@ -779,7 +820,7 @@ function clearSelection() {
 
 function renderBoard() {
   $$(".sq", boardEl).forEach((el) => {
-    el.innerHTML = "";
+    $(".piece", el)?.remove();
     el.classList.remove("is-check");
   });
 
@@ -867,6 +908,7 @@ function maybeComplete(lastMove) {
 
   if (ok && !done[stepIndex]) {
     done[stepIndex] = true;
+    lastCompletedStep = stepIndex;
     if (isCheckmate(state)) setStatus("Mat. Validé.", "good");
     else if (isStalemate(state)) setStatus("Pat (nulle). Validé.", "good");
     else setStatus("Validé.", "good");
