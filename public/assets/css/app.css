@@ -152,7 +152,7 @@ body{
     linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
   border: 1px solid var(--stroke2);
   box-shadow: var(--shadow);
-  overflow:hidden;
+  overflow:auto;
   position:relative;
   min-width:0;
 }
