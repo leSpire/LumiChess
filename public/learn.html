@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LumiChess — Apprendre les échecs</title>
+  <link rel="stylesheet" href="assets/css/app.css" />
+</head>
+<body class="learn-page">
+  <main class="learn-shell" id="tutorialPage">
+    <header class="learn-topbar glow">
+      <div>
+        <p class="panel__kicker">TUTORIEL</p>
+        <h1 class="learn-title">Apprendre les échecs</h1>
+      </div>
+      <div class="learn-topbar__actions">
+        <div class="pbar" title="Progression">
+          <div id="progressFill"></div>
+        </div>
+        <a class="btn ghost glow" href="index.html">← Retour accueil</a>
+      </div>
+    </header>
+
+    <section class="learn-layout">
+      <aside class="steps learn-steps">
+        <div class="steps__title">Chapitres</div>
+        <div id="stepsList"></div>
+        <div class="steps__hint">Raccourcis : <b>N</b> (next) · <b>R</b> (reset) · <b>Esc</b> (retour)</div>
+      </aside>
+
+      <section class="play learn-play">
+        <div class="info">
+          <div class="info__top">
+            <div>
+              <div class="info__title" id="stepTitle">—</div>
+              <div class="info__text" id="stepText">—</div>
+            </div>
+            <div class="status" id="status">Prêt.</div>
+          </div>
+          <div class="actions">
+            <button class="btn ghost glow" id="hintBtn">Indice</button>
+            <button class="btn ghost glow" id="resetBtn">Reset</button>
+            <button class="btn ghost glow" id="modeBtn">Mode libre</button>
+            <div class="spacer"></div>
+            <button class="btn glow" id="prevBtn">Retour</button>
+            <button class="btn primary glow" id="nextBtn">Suivant</button>
+          </div>
+        </div>
+
+        <div class="boardWrap">
+          <div class="board beautiful-board" id="board" aria-label="Échiquier"></div>
+          <div class="side">
+            <h4>Règle du chapitre</h4>
+            <p id="ruleText"></p>
+            <div class="tags" id="tags"></div>
+          </div>
+        </div>
+
+        <div class="toast" id="toast" aria-live="polite"></div>
+      </section>
+    </section>
+
+    <div class="toast global" id="globalToast"></div>
+  </main>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

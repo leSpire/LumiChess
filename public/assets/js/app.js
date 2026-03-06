@@ -539,6 +539,8 @@ const progressFill = $("#progressFill");
 const boardEl = $("#board");
 const toastEl = $("#toast");
 const globalToast = $("#globalToast");
+const tutorialPage = $("#tutorialPage");
+const isStandaloneTutorial = Boolean(tutorialPage);
 
 const openTutorialBtn = $("#openTutorialBtn");
 const openBasicsCard = $("#openBasicsCard");
@@ -581,6 +583,11 @@ function setStatus(msg, tone = "neutral") {
 }
 
 function openTutorial() {
+  if (isStandaloneTutorial) return;
+  if (!overlay) {
+    window.location.href = "learn.html";
+    return;
+  }
   overlay.classList.add("is-open");
   overlay.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
@@ -588,28 +595,38 @@ function openTutorial() {
   toast(globalToast, "Tutoriel ouvert.");
 }
 function closeTutorial() {
+  if (isStandaloneTutorial) {
+    window.location.href = "index.html";
+    return;
+  }
+  if (!overlay) return;
   overlay.classList.remove("is-open");
   overlay.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
   clearSelection();
 }
 
-openTutorialBtn.addEventListener("click", openTutorial);
-openBasicsCard.addEventListener("click", openTutorial);
-closeOverlayBtn.addEventListener("click", closeTutorial);
+openTutorialBtn?.addEventListener("click", () => {
+  window.location.href = "learn.html";
+});
+openBasicsCard?.addEventListener("click", () => {
+  window.location.href = "learn.html";
+});
+closeOverlayBtn?.addEventListener("click", closeTutorial);
 
-overlay.addEventListener("click", (e) => {
+overlay?.addEventListener("click", (e) => {
   if (e.target && e.target.dataset && e.target.dataset.close) closeTutorial();
 });
 
 document.addEventListener("keydown", (e) => {
-  if (!overlay.classList.contains("is-open")) return;
+  const tutorialActive = isStandaloneTutorial || overlay?.classList.contains("is-open");
+  if (!tutorialActive) return;
   if (e.key === "Escape") closeTutorial();
   if (e.key.toLowerCase() === "n") next();
   if (e.key.toLowerCase() === "r") reset();
 });
 
-$("#helpBtn").addEventListener("click", () => {
+$("#helpBtn")?.addEventListener("click", () => {
   toast(globalToast, "Raccourcis: N=Next · R=Reset · Esc=Close");
 });
 
@@ -727,11 +744,11 @@ function toggleMode() {
   syncStepsUI();
 }
 
-prevBtn.addEventListener("click", prev);
-nextBtn.addEventListener("click", next);
-resetBtn.addEventListener("click", reset);
-hintBtn.addEventListener("click", hint);
-modeBtn.addEventListener("click", toggleMode);
+prevBtn?.addEventListener("click", prev);
+nextBtn?.addEventListener("click", next);
+resetBtn?.addEventListener("click", reset);
+hintBtn?.addEventListener("click", hint);
+modeBtn?.addEventListener("click", toggleMode);
 
 function buildBoard() {
   boardEl.innerHTML = "";
@@ -992,6 +1009,7 @@ function moveGhost(x, y) {
 
 let miniState = startPosition();
 let miniSelectedSq = null;
+let miniDragging = null;
 
 function setMiniStatus(message) {
   const statusElMini = $("#miniBoardStatus");
@@ -1037,6 +1055,8 @@ function renderMiniBoard() {
         const pe = document.createElement("span");
         pe.className = `miniPiece ${colorOf(p) === "w" ? "w" : "b"}`;
         pe.textContent = U[p] || "";
+        pe.dataset.sq = sq;
+        pe.addEventListener("pointerdown", onMiniPiecePointerDown);
         cell.appendChild(pe);
       }
 
@@ -1077,11 +1097,74 @@ function resetMiniBoard() {
   renderMiniBoard();
 }
 
+function onMiniPiecePointerDown(e) {
+  const fromSq = e.currentTarget.dataset.sq;
+  const p = pieceAt(miniState, fromSq);
+  if (!p || colorOf(p) !== miniState.turn) return;
+
+  e.preventDefault();
+
+  miniSelectedSq = fromSq;
+  const moves = genLegalMoves(miniState, fromSq);
+  renderMiniBoard();
+
+  const ghost = document.createElement("div");
+  ghost.className = "miniDragGhost";
+  ghost.textContent = e.currentTarget.textContent;
+  ghost.style.color = getComputedStyle(e.currentTarget).color;
+  document.body.appendChild(ghost);
+
+  miniDragging = { fromSq, ghost, moves };
+  moveMiniGhost(e.clientX, e.clientY);
+}
+
+document.addEventListener("pointermove", (e) => {
+  if (!miniDragging) return;
+  moveMiniGhost(e.clientX, e.clientY);
+});
+
+document.addEventListener("pointerup", (e) => {
+  if (!miniDragging) return;
+
+  const { moves, ghost } = miniDragging;
+  ghost.remove();
+
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  const sqEl = under?.closest?.(".miniSq");
+  const toSq = sqEl?.dataset?.sq || null;
+
+  if (!toSq) {
+    miniDragging = null;
+    clearMiniSelection();
+    renderMiniBoard();
+    return;
+  }
+
+  const mv = moves.find((m) => m.to === toSq);
+  if (!mv) {
+    miniDragging = null;
+    clearMiniSelection();
+    renderMiniBoard();
+    return;
+  }
+
+  miniState = makeMove(miniState, { ...mv });
+  miniDragging = null;
+  clearMiniSelection();
+  renderMiniBoard();
+});
+
+function moveMiniGhost(x, y) {
+  miniDragging.ghost.style.left = `${x}px`;
+  miniDragging.ghost.style.top = `${y}px`;
+}
+
 $("#miniBoardReset")?.addEventListener("click", resetMiniBoard);
 renderMiniBoard();
 
 (() => {
   const hv = $("#heroVisual");
+  if (!hv) return;
   hv.addEventListener("mousemove", (e) => {
     const r = hv.getBoundingClientRect();
     const dx = (e.clientX - (r.left + r.width / 2)) / r.width;
@@ -1093,7 +1176,11 @@ renderMiniBoard();
   });
 })();
 
-closeTutorial();
+if (!isStandaloneTutorial) {
+  closeTutorial();
+} else {
+  initTutorial();
+}
 
 const STORE_KEY = "lumichess-users-v1";
 const SESSION_KEY = "lumichess-session-v1";
@@ -1256,4 +1343,4 @@ $("#goalsList")?.addEventListener("change", (e) => {
   updateDashboard();
 });
 
-updateDashboard();
+if ($("#profileName")) updateDashboard();
