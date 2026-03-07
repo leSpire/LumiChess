@@ -557,6 +557,13 @@ const learnStepsEl = $("#learnSteps");
 const chapterNextCardEl = $("#chapterNextCard");
 const chapterNextBtnEl = $("#chapterNextBtn");
 const promoPickerEl = $("#promoPicker");
+const primeStatusEl = $("#primeStatus");
+const primeLastMoveEl = $("#primeLastMove");
+const primeFenEl = $("#primeFen");
+const primeFenBtn = $("#primeFenBtn");
+const primeUndoBtn = $("#primeUndoBtn");
+const primeNewBtn = $("#primeNewBtn");
+const moveHistoryBody = $("#moveHistoryBody");
 
 let stepIndex = 0;
 let done = lessons.map(() => false);
@@ -571,9 +578,12 @@ let legalMovesFromSelected = [];
 let lastCompletedStep = null;
 let boardFlipped = false;
 let collapsedSteps = false;
+let moveHistory = [];
+let stateHistory = [];
 
 function setStatus(msg, tone = "neutral") {
   statusEl.textContent = msg;
+  if (primeStatusEl) primeStatusEl.textContent = msg;
   statusEl.style.borderColor =
     tone === "good" ? "rgba(46,204,113,.25)"
       : tone === "bad" ? "rgba(255,90,115,.25)"
@@ -589,6 +599,63 @@ function setStatus(msg, tone = "neutral") {
       : tone === "bad" ? "rgba(255,90,115,.92)"
         : tone === "warn" ? "rgba(241,196,15,.92)"
           : "rgba(255,255,255,.62)";
+}
+
+function stateToFEN(st) {
+  const ranks = [];
+  for (let i = 0; i < 8; i += 1) {
+    let empty = 0;
+    let rank = "";
+    for (let j = 0; j < 8; j += 1) {
+      const piece = st.board[i][j];
+      if (!piece) {
+        empty += 1;
+      } else {
+        if (empty) {
+          rank += String(empty);
+          empty = 0;
+        }
+        const letter = piece[1];
+        rank += piece[0] === "w" ? letter.toUpperCase() : letter;
+      }
+    }
+    if (empty) rank += String(empty);
+    ranks.push(rank);
+  }
+
+  let castling = "";
+  if (st.castling.wK) castling += "K";
+  if (st.castling.wQ) castling += "Q";
+  if (st.castling.bK) castling += "k";
+  if (st.castling.bQ) castling += "q";
+  if (!castling) castling = "-";
+
+  return `${ranks.join("/")} ${st.turn} ${castling} ${st.ep || "-"} ${st.halfmove || 0} ${st.fullmove || 1}`;
+}
+
+function updatePrimePanels() {
+  if (primeLastMoveEl) {
+    const last = moveHistory[moveHistory.length - 1];
+    primeLastMoveEl.textContent = last ? `${last.from}→${last.to}${last.promo ? `=${last.promo.toUpperCase()}` : ""}` : "—";
+  }
+  if (primeFenEl) primeFenEl.textContent = state ? stateToFEN(state) : "—";
+
+  if (moveHistoryBody) {
+    moveHistoryBody.innerHTML = "";
+    if (!moveHistory.length) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td colspan="3" class="history-empty">Aucun coup joué.</td>';
+      moveHistoryBody.appendChild(tr);
+    } else {
+      for (let i = 0; i < moveHistory.length; i += 2) {
+        const tr = document.createElement("tr");
+        const white = moveHistory[i];
+        const black = moveHistory[i + 1];
+        tr.innerHTML = `<td>${Math.floor(i / 2) + 1}</td><td>${white ? `${white.from}→${white.to}` : ""}</td><td>${black ? `${black.from}→${black.to}` : "—"}</td>`;
+        moveHistoryBody.appendChild(tr);
+      }
+    }
+  }
 }
 
 function openTutorial() {
@@ -713,6 +780,17 @@ function initTutorial() {
   loadStep(0);
 }
 
+function undoPrimeMove() {
+  if (stateHistory.length <= 1) return;
+  stateHistory.pop();
+  moveHistory.pop();
+  state = cloneState(stateHistory[stateHistory.length - 1]);
+  clearSelection();
+  renderBoard();
+  updatePrimePanels();
+  setStatus("Coup annulé.", "warn");
+}
+
 function updateCoachPanel() {
   const completed = done.filter(Boolean).length;
   const streak = done.slice(0, stepIndex + 1).filter(Boolean).length;
@@ -794,9 +872,12 @@ function loadStep(i) {
 
   state = fenToState(lesson.fen);
   baseState = cloneState(state);
+  stateHistory = [cloneState(state)];
+  moveHistory = [];
 
   clearSelection();
   renderBoard();
+  updatePrimePanels();
   if (ctx.targetSq) setStatus(`Trouve la case: ${ctx.targetSq} (${ctx.progress}/5)`, "warn");
   else setStatus("À toi.", "neutral");
   syncStepsUI();
@@ -819,8 +900,11 @@ function next() {
 
 function reset() {
   state = cloneState(baseState);
+  stateHistory = [cloneState(state)];
+  moveHistory = [];
   clearSelection();
   renderBoard();
+  updatePrimePanels();
   setStatus("Reset.", "neutral");
   toast(toastEl, "Position remise à zéro.");
 }
@@ -844,6 +928,17 @@ modeBtn?.addEventListener("click", toggleMode);
 flipBtn?.addEventListener("click", toggleBoardOrientation);
 toggleStepsBtn?.addEventListener("click", toggleSteps);
 chapterNextBtnEl?.addEventListener("click", next);
+primeUndoBtn?.addEventListener("click", undoPrimeMove);
+primeNewBtn?.addEventListener("click", reset);
+primeFenBtn?.addEventListener("click", async () => {
+  if (!state || !navigator?.clipboard) return;
+  try {
+    await navigator.clipboard.writeText(stateToFEN(state));
+    toast(toastEl, "FEN copié");
+  } catch {
+    toast(toastEl, "Copie impossible");
+  }
+});
 
 function buildBoard() {
   boardEl.innerHTML = "";
@@ -1024,10 +1119,13 @@ function onSquareClick(sq) {
       if (!mv) return;
       animateMoveDOM(mv.from, mv.to);
       state = makeMove(state, { ...mv });
+      moveHistory.push({ ...mv });
+      stateHistory.push(cloneState(state));
 
       setTimeout(() => {
         clearSelection();
         renderBoard();
+        updatePrimePanels();
         toast(toastEl, `${mv.from}→${mv.to}`);
         maybeComplete(mv);
       }, 0);
@@ -1118,10 +1216,13 @@ document.addEventListener("pointerup", (e) => {
     if (!mv) return;
     animateMoveDOM(mv.from, mv.to);
     state = makeMove(state, { ...mv });
+    moveHistory.push({ ...mv });
+    stateHistory.push(cloneState(state));
 
     setTimeout(() => {
       clearSelection();
       renderBoard();
+      updatePrimePanels();
       toast(toastEl, `${mv.from}→${mv.to}`);
       maybeComplete(mv);
     }, 0);

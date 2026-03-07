@@ -42,12 +42,29 @@
           </div>
           <div class="actions">
             <button class="btn ghost glow" id="hintBtn">Indice</button>
-            <button class="btn ghost glow" id="resetBtn">Reset</button>
             <button class="btn ghost glow" id="modeBtn">Mode libre</button>
-            <button class="btn primary glow" id="flipBtn">Tourner l'échiquier</button>
+            <button class="btn ghost glow" id="resetBtn">Reset chapitre</button>
+            <button class="btn ghost glow" id="primeUndoBtn">Undo</button>
+            <button class="btn ghost glow" id="flipBtn">Flip</button>
+            <button class="btn primary glow" id="primeNewBtn">Nouvelle partie</button>
             <div class="spacer"></div>
             <button class="btn glow" id="prevBtn">Retour</button>
             <button class="btn primary glow" id="nextBtn">Suivant</button>
+          </div>
+        </div>
+
+        <div class="prime-stats">
+          <div class="prime-card">
+            <p>Statut</p>
+            <strong id="primeStatus">Prêt.</strong>
+          </div>
+          <div class="prime-card">
+            <p>Dernier coup</p>
+            <strong id="primeLastMove">—</strong>
+          </div>
+          <div class="prime-card">
+            <p>FEN</p>
+            <button id="primeFenBtn" type="button"><span id="primeFen">—</span></button>
           </div>
         </div>
 
@@ -90,6 +107,18 @@
               <h4>Chapitre validé ✅</h4>
               <p>Bravo ! Tu peux continuer vers le chapitre suivant.</p>
               <button class="btn primary glow" id="chapterNextBtn" type="button">Chapitre suivant</button>
+            </div>
+
+            <div class="coach-card">
+              <h4>Historique</h4>
+              <div class="history-box">
+                <table>
+                  <thead>
+                    <tr><th>#</th><th>Blancs</th><th>Noirs</th></tr>
+                  </thead>
+                  <tbody id="moveHistoryBody"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

@@ -702,6 +702,24 @@ body{
   align-items:center;
   gap: 10px;
 }
+.prime-stats{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px;
+}
+.prime-card{
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.03);
+  border-radius: 14px;
+  padding: 10px;
+  min-width: 0;
+}
+.prime-card p{ margin:0; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color: rgba(255,255,255,.45); }
+.prime-card strong,
+.prime-card button{ margin-top:7px; display:block; width:100%; font-size:13px; color: rgba(255,255,255,.9); }
+.prime-card button{ border:0; background:transparent; padding:0; text-align:left; cursor:pointer; }
+.prime-card button span{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .spacer{ flex:1; }
 
 .btn{
@@ -906,6 +924,7 @@ body{
   .panel__body{ grid-template-columns: 1fr; }
   .steps{ display:none; }
   .side{ display:none; }
+  .prime-stats{ grid-template-columns: 1fr; }
 }
 
 .account{
@@ -1162,6 +1181,17 @@ body{
   line-height: 1.45;
   font-size: 12px;
 }
+.history-box{
+  max-height: 260px;
+  overflow:auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.history-box table{ width:100%; border-collapse: collapse; font-size: 12px; }
+.history-box th,
+.history-box td{ padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.06); text-align:left; }
+.history-box th{ color: rgba(255,255,255,.56); }
+.history-empty{ color: rgba(255,255,255,.4); }
 .miniDragGhost{
   position: fixed;
   z-index: 9999;
