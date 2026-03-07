@@ -683,10 +683,10 @@ function closeTutorial() {
 }
 
 openTutorialBtn?.addEventListener("click", () => {
-  window.location.href = "learn.html";
+  openTutorial();
 });
 openBasicsCard?.addEventListener("click", () => {
-  window.location.href = "learn.html";
+  openTutorial();
 });
 closeOverlayBtn?.addEventListener("click", closeTutorial);
 
