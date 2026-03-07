@@ -22,8 +22,11 @@
     </header>
 
     <section class="learn-layout">
-      <aside class="steps learn-steps">
-        <div class="steps__title">Chapitres</div>
+      <aside class="steps learn-steps" id="learnSteps">
+        <div class="steps__head">
+          <div class="steps__title">Chapitres</div>
+          <button class="iconbtn" id="toggleStepsBtn" type="button" aria-label="Réduire le menu des chapitres">⟨</button>
+        </div>
         <div id="stepsList"></div>
         <div class="steps__hint">Raccourcis : <b>N</b> (next) · <b>R</b> (reset) · <b>Esc</b> (retour)</div>
       </aside>
@@ -41,6 +44,7 @@
             <button class="btn ghost glow" id="hintBtn">Indice</button>
             <button class="btn ghost glow" id="resetBtn">Reset</button>
             <button class="btn ghost glow" id="modeBtn">Mode libre</button>
+            <button class="btn primary glow" id="flipBtn">Tourner l'échiquier</button>
             <div class="spacer"></div>
             <button class="btn glow" id="prevBtn">Retour</button>
             <button class="btn primary glow" id="nextBtn">Suivant</button>
@@ -81,6 +85,12 @@
                 <li>Valide le chapitre puis passe au suivant.</li>
               </ul>
             </div>
+
+            <div class="coach-card chapter-next" id="chapterNextCard" hidden>
+              <h4>Chapitre validé ✅</h4>
+              <p>Bravo ! Tu peux continuer vers le chapitre suivant.</p>
+              <button class="btn primary glow" id="chapterNextBtn" type="button">Chapitre suivant</button>
+            </div>
           </div>
         </div>
 
@@ -89,6 +99,18 @@
     </section>
 
     <div class="toast global" id="globalToast"></div>
+
+    <div class="promo-picker" id="promoPicker" hidden>
+      <div class="promo-picker__box">
+        <p>Choisis la pièce de promotion</p>
+        <div class="promo-picker__choices">
+          <button class="btn glow" data-promo="q" type="button">Dame ♕</button>
+          <button class="btn glow" data-promo="r" type="button">Tour ♖</button>
+          <button class="btn glow" data-promo="b" type="button">Fou ♗</button>
+          <button class="btn glow" data-promo="n" type="button">Cavalier ♘</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="assets/js/app.js"></script>
