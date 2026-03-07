@@ -3,145 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LumiChess — Apprendre les échecs</title>
+  <title>LumiChess — Échiquier Prime</title>
   <link rel="stylesheet" href="assets/css/app.css" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/framer-motion/dist/framer-motion.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.4.0/cjs/chess.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="learn-page">
-  <main class="learn-shell" id="tutorialPage">
-    <header class="learn-topbar glow">
-      <div>
-        <p class="panel__kicker">TUTORIEL</p>
-        <h1 class="learn-title">Apprendre les échecs</h1>
-      </div>
-      <div class="learn-topbar__actions">
-        <div class="pbar" title="Progression">
-          <div id="progressFill"></div>
-        </div>
-        <a class="btn ghost glow" href="index.html">← Retour accueil</a>
-      </div>
-    </header>
-
-    <section class="learn-layout">
-      <aside class="steps learn-steps" id="learnSteps">
-        <div class="steps__head">
-          <div class="steps__title">Chapitres</div>
-          <button class="iconbtn" id="toggleStepsBtn" type="button" aria-label="Réduire le menu des chapitres">⟨</button>
-        </div>
-        <div id="stepsList"></div>
-        <div class="steps__hint">Raccourcis : <b>N</b> (next) · <b>R</b> (reset) · <b>Esc</b> (retour)</div>
-      </aside>
-
-      <section class="play learn-play">
-        <div class="info">
-          <div class="info__top">
-            <div>
-              <div class="info__title" id="stepTitle">—</div>
-              <div class="info__text" id="stepText">—</div>
-            </div>
-            <div class="status" id="status">Prêt.</div>
-          </div>
-          <div class="actions">
-            <button class="btn ghost glow" id="hintBtn">Indice</button>
-            <button class="btn ghost glow" id="modeBtn">Mode libre</button>
-            <button class="btn ghost glow" id="resetBtn">Reset chapitre</button>
-            <button class="btn ghost glow" id="primeUndoBtn">Undo</button>
-            <button class="btn ghost glow" id="flipBtn">Flip</button>
-            <button class="btn primary glow" id="primeNewBtn">Nouvelle partie</button>
-            <div class="spacer"></div>
-            <button class="btn glow" id="prevBtn">Retour</button>
-            <button class="btn primary glow" id="nextBtn">Suivant</button>
-          </div>
-        </div>
-
-        <div class="prime-stats">
-          <div class="prime-card">
-            <p>Statut</p>
-            <strong id="primeStatus">Prêt.</strong>
-          </div>
-          <div class="prime-card">
-            <p>Dernier coup</p>
-            <strong id="primeLastMove">—</strong>
-          </div>
-          <div class="prime-card">
-            <p>FEN</p>
-            <button id="primeFenBtn" type="button"><span id="primeFen">—</span></button>
-          </div>
-        </div>
-
-        <div class="boardWrap">
-          <div class="board beautiful-board" id="board" aria-label="Échiquier"></div>
-          <div class="side">
-            <h4>Règle du chapitre</h4>
-            <p id="ruleText"></p>
-            <div class="tags" id="tags"></div>
-
-            <div class="coach-card">
-              <h4>Progression joueur</h4>
-              <div class="coach-stats">
-                <div class="coach-stat">
-                  <span>XP</span>
-                  <strong id="xpPoints">0</strong>
-                </div>
-                <div class="coach-stat">
-                  <span>Série</span>
-                  <strong id="streakCount">0</strong>
-                </div>
-                <div class="coach-stat">
-                  <span>Chapitres</span>
-                  <strong id="chapterScore">0/0</strong>
-                </div>
-              </div>
-              <p class="coach-reward" id="rewardText">Valide un chapitre pour gagner tes premiers points.</p>
-            </div>
-
-            <div class="coach-card">
-              <h4>Mission pédagogique</h4>
-              <ul class="coach-list">
-                <li>Clique une pièce pour voir ses coups légaux.</li>
-                <li>Observe les coordonnées (a→h, 1→8).</li>
-                <li>Valide le chapitre puis passe au suivant.</li>
-              </ul>
-            </div>
-
-            <div class="coach-card chapter-next" id="chapterNextCard" hidden>
-              <h4>Chapitre validé ✅</h4>
-              <p>Bravo ! Tu peux continuer vers le chapitre suivant.</p>
-              <button class="btn primary glow" id="chapterNextBtn" type="button">Chapitre suivant</button>
-            </div>
-
-            <div class="coach-card">
-              <h4>Historique</h4>
-              <div class="history-box">
-                <table>
-                  <thead>
-                    <tr><th>#</th><th>Blancs</th><th>Noirs</th></tr>
-                  </thead>
-                  <tbody id="moveHistoryBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="toast" id="toast" aria-live="polite"></div>
-      </section>
-    </section>
-
-    <div class="toast global" id="globalToast"></div>
-
-    <div class="promo-picker" id="promoPicker" hidden>
-      <div class="promo-picker__box">
-        <p>Choisis la pièce de promotion</p>
-        <div class="promo-picker__choices">
-          <button class="btn glow" data-promo="q" type="button">Dame ♕</button>
-          <button class="btn glow" data-promo="r" type="button">Tour ♖</button>
-          <button class="btn glow" data-promo="b" type="button">Fou ♗</button>
-          <button class="btn glow" data-promo="n" type="button">Cavalier ♘</button>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <script src="assets/js/app.js"></script>
+<body>
+  <div id="prime-root"></div>
+  <script type="text/babel" data-presets="react" src="assets/js/prime-board.jsx"></script>
 </body>
 </html>
