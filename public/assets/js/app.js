@@ -236,6 +236,7 @@ function makeMove(state, move) {
   let placed = piece;
   if (move.promo) {
     placed = c + move.promo;
+    move.special = move.special || "promo";
   } else if (t === "p") {
     const promRow = c === "w" ? 0 : 7;
     if (ti === promRow) {
@@ -289,8 +290,9 @@ function genPseudoMoves(state, fromSq = null) {
         const i1 = i + dir;
         if (inBounds(i1, j) && !b[i1][j]) {
           const to = ijToSq(i1, j);
-          if (i1 === promRow) push(from, to, { promo: "q" });
-          else push(from, to);
+          if (i1 === promRow) {
+            ["q", "r", "b", "n"].forEach((promo) => push(from, to, { promo, special: "promo" }));
+          } else push(from, to);
 
           const i2 = i + 2 * dir;
           if (i === startRow && inBounds(i2, j) && !b[i2][j]) push(from, ijToSq(i2, j));
@@ -304,8 +306,9 @@ function genPseudoMoves(state, fromSq = null) {
           const to = ijToSq(ic, jc);
           const target = b[ic][jc];
           if (target && colorOf(target) !== turn) {
-            if (ic === promRow) push(from, to, { promo: "q" });
-            else push(from, to);
+            if (ic === promRow) {
+              ["q", "r", "b", "n"].forEach((promo) => push(from, to, { promo, special: "promo" }));
+            } else push(from, to);
           }
 
           if (state.ep && to === state.ep) {
@@ -409,112 +412,105 @@ function isStalemate(state) {
 
 const lessons = [
   {
-    name: "1) Échiquier & coordonnées",
-    text: "Clique des cases. Objectif: comprendre a→h et 1→8.",
+    name: "1) Coordonnées",
+    text: "Trouve les cases demandées (5 réussites pour valider).",
     fen: "8/8/8/8/8/8/8/8 w - -",
-    rule: "a1 = en bas à gauche (côté blancs). Les blancs commencent.",
-    tags: ["Coordonnées", "Orientation"],
-    hint: "Clique h1 puis a8 pour te repérer.",
+    rule: "Objectif: repérer vite les coordonnées. Clique la case demandée.",
+    tags: ["Coordonnées", "Repérage"],
+    hint: "Lis d'abord la lettre (colonne), puis le chiffre (rangée).",
     allowAnyClick: true,
-    complete: (ctx) => ctx.clickedOnce,
+    setup: (ctx) => {
+      ctx.targets = Array.from({ length: 5 }, () => FILES[Math.floor(Math.random() * 8)] + String(1 + Math.floor(Math.random() * 8)));
+      ctx.progress = 0;
+      ctx.targetSq = ctx.targets[0];
+    },
+    complete: (ctx) => ctx.progress >= 5,
   },
   {
-    name: "2) Pion: avance",
-    text: "Fais avancer le pion de e2 vers e4 (ou e3).",
-    fen: "8/8/8/8/8/8/4P3/8 w - -",
-    rule: "Le pion avance tout droit. Au premier coup: 2 cases si libre.",
-    tags: ["Pion", "Avance"],
-    hint: "e2 → e4.",
-    complete: (ctx, last) => last && last.from === "e2" && (last.to === "e4" || last.to === "e3"),
+    name: "2) Pion: déplacement et prises",
+    text: "Applique les règles du pion, y compris en passant.",
+    fen: "8/8/8/3pP3/8/8/4P3/8 w - d6",
+    rule: "Le pion avance d'1 case (ou 2 au premier coup), capture en diagonale, et peut prendre en passant juste après un double pas adverse.",
+    tags: ["Pion", "Double pas", "Diagonale", "En passant"],
+    hint: "Commence par e2→e4, puis cherche la prise e5xd6 e.p.",
+    complete: (ctx, last) => {
+      if (!last) return false;
+      if (last.from === "e2" && (last.to === "e3" || last.to === "e4")) ctx.didAdvance = true;
+      if (last.from === "e5" && last.to === "d6" && last.special === "ep") ctx.didEnPassant = true;
+      if (last.from === "e4" && last.to === "d5") ctx.didDiagonal = true;
+      return Boolean(ctx.didAdvance && (ctx.didEnPassant || ctx.didDiagonal));
+    },
   },
   {
-    name: "3) Pion: capture diagonale",
-    text: "Capture le pion noir : e4xd5.",
-    fen: "8/8/8/3p4/4P3/8/8/8 w - -",
-    rule: "Le pion capture uniquement en diagonale (1 case).",
-    tags: ["Pion", "Capture"],
-    hint: "e4 → d5 (capture).",
-    complete: (ctx, last) => last && last.from === "e4" && last.to === "d5",
-  },
-  {
-    name: "4) Tour",
-    text: "Joue la tour de a1 à a5.",
+    name: "3) Tour",
+    text: "Joue la tour vers la case cible.",
     fen: "8/8/8/8/8/8/8/R7 w - -",
-    rule: "La tour bouge en ligne droite, sans sauter.",
+    rule: "La tour va en ligne droite (colonnes/lignes), sans sauter les pièces.",
     tags: ["Tour"],
     hint: "a1 → a5.",
     complete: (ctx, last) => last && last.from === "a1" && last.to === "a5",
   },
   {
-    name: "5) Fou",
-    text: "Joue le fou de c1 à g5.",
+    name: "4) Fou",
+    text: "Amène le fou sur la case indiquée.",
     fen: "8/8/8/8/8/8/8/2B5 w - -",
-    rule: "Le fou bouge en diagonale, sans sauter.",
+    rule: "Le fou se déplace en diagonale et ne saute pas.",
     tags: ["Fou"],
     hint: "c1 → g5.",
     complete: (ctx, last) => last && last.from === "c1" && last.to === "g5",
   },
   {
-    name: "6) Cavalier",
-    text: "Joue le cavalier de g1 à f3.",
+    name: "5) Cavalier",
+    text: "Joue le cavalier au bon endroit.",
     fen: "8/8/8/8/8/8/8/6N1 w - -",
-    rule: "Le cavalier bouge en L (2+1). Il saute.",
+    rule: "Le cavalier se déplace en L (2+1) et peut sauter les pièces.",
     tags: ["Cavalier"],
     hint: "g1 → f3.",
     complete: (ctx, last) => last && last.from === "g1" && last.to === "f3",
   },
   {
-    name: "7) Dame",
-    text: "Joue la dame de d1 à h5.",
+    name: "6) Dame",
+    text: "Utilise la dame comme tour + fou.",
     fen: "8/8/8/8/8/8/8/3Q4 w - -",
-    rule: "La dame = tour + fou.",
+    rule: "La dame combine les déplacements de la tour et du fou.",
     tags: ["Dame"],
     hint: "d1 → h5.",
     complete: (ctx, last) => last && last.from === "d1" && last.to === "h5",
   },
   {
-    name: "8) Échec: réponse obligatoire",
-    text: "Le roi est en échec. Fais un coup légal pour sortir de l’échec.",
+    name: "7) Échec: réponse obligatoire",
+    text: "Le roi blanc est en échec: trouve une réponse légale.",
     fen: "4r3/8/8/8/8/8/8/4K3 w - -",
-    rule: "En échec: bouger roi, capturer, ou interposer (si possible).",
-    tags: ["Roi", "Échec"],
-    hint: "Bouge le roi.",
+    rule: "En échec, il faut répondre: bouger le roi, capturer l'attaquant ou interposer une pièce.",
+    tags: ["Échec", "Défense"],
+    hint: "Ici, déplace le roi blanc sur une case sûre.",
     complete: (ctx, last, st) => !inCheck(st, "w"),
   },
   {
-    name: "9) Roque",
+    name: "8) Roque",
     text: "Réalise un roque côté roi (O-O) avec les blancs.",
     fen: "r3k2r/8/8/8/8/8/8/R3K2R w KQkq -",
-    rule: "Le roi se déplace de 2 cases, la tour passe de l’autre côté. Conditions strictes.",
-    tags: ["Roque"],
+    rule: "Le roque sécurise le roi. Impossible si le roi a déjà bougé, si la tour a bougé, ou si une case traversée est attaquée.",
+    tags: ["Roque", "Sécurité du roi"],
     hint: "e1 → g1.",
     complete: (ctx, last) => last && last.special === "castleK" && last.from === "e1" && last.to === "g1",
   },
   {
-    name: "10) En passant",
-    text: "Fais une prise en passant : exd6 e.p.",
-    fen: "8/8/8/3pP3/8/8/8/8 w - d6",
-    rule: "Possible seulement immédiatement après un double pas adverse.",
-    tags: ["En passant"],
-    hint: "e5 → d6.",
-    complete: (ctx, last) => last && last.special === "ep",
-  },
-  {
-    name: "11) Promotion",
-    text: "Pousse le pion jusqu’à la 8e rangée pour le promouvoir (auto-Dame).",
+    name: "9) Promotion",
+    text: "Pousse le pion en 8e rangée puis choisis une pièce.",
     fen: "8/4P3/8/8/8/8/8/8 w - -",
-    rule: "Arrivé au bout: promotion (souvent Dame).",
+    rule: "À la promotion, tu peux choisir Dame, Tour, Fou ou Cavalier. La Dame est souvent le meilleur choix, mais pas toujours.",
     tags: ["Promotion"],
-    hint: "e7 → e8.",
+    hint: "e7 → e8 puis choisis la pièce.",
     complete: (ctx, last) => last && last.special === "promo",
   },
   {
-    name: "12) Mat / Pat",
-    text: "Obtiens mat en 1, ou observe pat/nulle si ça arrive.",
+    name: "10) Mat / Pat",
+    text: "Trouve un mat en 1, ou observe un pat.",
     fen: "6k1/5ppp/8/8/7Q/8/6PP/6K1 w - -",
-    rule: "Mat = échec + aucune défense. Pat = pas d’échec + aucun coup légal.",
+    rule: "Mat = échec sans défense. Pat = pas d'échec et aucun coup légal.",
     tags: ["Mat", "Pat"],
-    hint: "Cherche un coup d’échec sans fuite.",
+    hint: "Cherche un échec qui ne laisse aucune fuite au roi.",
     complete: (ctx, last, st) => isCheckmate(st) || isStalemate(st),
   },
   {
@@ -555,6 +551,12 @@ const nextBtn = $("#nextBtn");
 const resetBtn = $("#resetBtn");
 const hintBtn = $("#hintBtn");
 const modeBtn = $("#modeBtn");
+const flipBtn = $("#flipBtn");
+const toggleStepsBtn = $("#toggleStepsBtn");
+const learnStepsEl = $("#learnSteps");
+const chapterNextCardEl = $("#chapterNextCard");
+const chapterNextBtnEl = $("#chapterNextBtn");
+const promoPickerEl = $("#promoPicker");
 
 let stepIndex = 0;
 let done = lessons.map(() => false);
@@ -567,6 +569,8 @@ let ctx = { clickedOnce: false };
 let selectedSq = null;
 let legalMovesFromSelected = [];
 let lastCompletedStep = null;
+let boardFlipped = false;
+let collapsedSteps = false;
 
 function setStatus(msg, tone = "neutral") {
   statusEl.textContent = msg;
@@ -640,11 +644,70 @@ function fenToState(fen) {
   return loadFEN(fen);
 }
 
+function getDisplaySquare(i, j) {
+  if (!boardFlipped) return FILES[j] + String(8 - i);
+  return FILES[7 - j] + String(i + 1);
+}
+
+function toggleSteps() {
+  collapsedSteps = !collapsedSteps;
+  tutorialPage?.classList.toggle("steps-collapsed", collapsedSteps);
+  if (toggleStepsBtn) {
+    toggleStepsBtn.textContent = collapsedSteps ? "⟩" : "⟨";
+    toggleStepsBtn.setAttribute("aria-label", collapsedSteps ? "Agrandir le menu des chapitres" : "Réduire le menu des chapitres");
+  }
+}
+
+function toggleBoardOrientation() {
+  boardFlipped = !boardFlipped;
+  buildBoard();
+  clearSelection();
+  renderBoard();
+  toast(toastEl, boardFlipped ? "Échiquier côté noir" : "Échiquier côté blanc");
+}
+
+function updateChapterNextCard() {
+  if (!chapterNextCardEl) return;
+  const shouldShow = done[stepIndex] && stepIndex < lessons.length - 1 && !freeMode;
+  chapterNextCardEl.hidden = !shouldShow;
+}
+
+function askPromotionChoice() {
+  if (!promoPickerEl) return Promise.resolve("q");
+  promoPickerEl.hidden = false;
+  return new Promise((resolve) => {
+    const buttons = $$("[data-promo]", promoPickerEl);
+    const clean = () => {
+      buttons.forEach((btn) => btn.removeEventListener("click", onClick));
+      promoPickerEl.hidden = true;
+    };
+    const onClick = (e) => {
+      const promo = e.currentTarget.dataset.promo || "q";
+      clean();
+      resolve(promo);
+    };
+    buttons.forEach((btn) => btn.addEventListener("click", onClick));
+  });
+}
+
+async function chooseMoveForTarget(candidates) {
+  if (candidates.length === 0) return null;
+  if (candidates.length === 1) return candidates[0];
+  if (!candidates.some((m) => m.special === "promo")) return candidates[0];
+
+  const promo = await askPromotionChoice();
+  return candidates.find((m) => m.promo === promo) || candidates[0];
+}
+
 function initTutorial() {
   done = lessons.map(() => false);
   stepIndex = 0;
   freeMode = false;
   lastCompletedStep = null;
+  boardFlipped = false;
+  collapsedSteps = false;
+  tutorialPage?.classList.remove("steps-collapsed");
+  if (toggleStepsBtn) toggleStepsBtn.textContent = "⟨";
   buildSteps();
   buildBoard();
   loadStep(0);
@@ -706,6 +769,7 @@ function syncStepsUI() {
 
   modeBtn.textContent = freeMode ? "Mode guidé" : "Mode libre";
   updateCoachPanel();
+  updateChapterNextCard();
 }
 
 function loadStep(i) {
@@ -714,6 +778,7 @@ function loadStep(i) {
 
   const lesson = lessons[i];
   freeMode = lesson.name === "Mode libre";
+  if (typeof lesson.setup === "function") lesson.setup(ctx);
 
   stepTitle.textContent = lesson.name;
   stepText.textContent = lesson.text;
@@ -732,8 +797,8 @@ function loadStep(i) {
 
   clearSelection();
   renderBoard();
-  setStatus("À toi.", "neutral");
-  toast(toastEl, "Step chargé.");
+  if (ctx.targetSq) setStatus(`Trouve la case: ${ctx.targetSq} (${ctx.progress}/5)`, "warn");
+  else setStatus("À toi.", "neutral");
   syncStepsUI();
 }
 
@@ -776,13 +841,17 @@ nextBtn?.addEventListener("click", next);
 resetBtn?.addEventListener("click", reset);
 hintBtn?.addEventListener("click", hint);
 modeBtn?.addEventListener("click", toggleMode);
+flipBtn?.addEventListener("click", toggleBoardOrientation);
+toggleStepsBtn?.addEventListener("click", toggleSteps);
+chapterNextBtnEl?.addEventListener("click", next);
 
 function buildBoard() {
   boardEl.innerHTML = "";
   for (let i = 0; i < 8; i += 1) {
     for (let j = 0; j < 8; j += 1) {
-      const sq = ijToSq(i, j);
-      const dark = (i + j) % 2 === 1;
+      const sq = getDisplaySquare(i, j);
+      const [ri, rj] = sqToIJ(sq);
+      const dark = (ri + rj) % 2 === 1;
       const cell = document.createElement("div");
       cell.className = `sq ${dark ? "dark" : "light"}`;
       cell.dataset.sq = sq;
@@ -790,13 +859,13 @@ function buildBoard() {
       if (i === 7) {
         const file = document.createElement("span");
         file.className = "coord-file";
-        file.textContent = FILES[j];
+        file.textContent = sq[0];
         cell.appendChild(file);
       }
       if (j === 0) {
         const rank = document.createElement("span");
         rank.className = "coord-rank";
-        rank.textContent = String(8 - i);
+        rank.textContent = sq[1];
         cell.appendChild(rank);
       }
 
@@ -913,6 +982,7 @@ function maybeComplete(lastMove) {
     else if (isStalemate(state)) setStatus("Pat (nulle). Validé.", "good");
     else setStatus("Validé.", "good");
     toast(toastEl, "✓ Chapitre validé");
+    if (stepIndex < lessons.length - 1) setStatus("Validé. Clique sur Chapitre suivant.", "good");
   } else {
     if (inCheck(state, state.turn)) setStatus("Échec.", "bad");
     else setStatus("Continue.", "neutral");
@@ -924,31 +994,44 @@ function onSquareClick(sq) {
   const lesson = lessons[stepIndex];
 
   if (lesson.allowAnyClick) {
-    ctx.clickedOnce = true;
-    setStatus(`Coordonnée: ${sq}`, "good");
-    maybeComplete(null);
+    if (sq === ctx.targetSq) {
+      ctx.clickedOnce = true;
+      ctx.progress += 1;
+      if (ctx.progress >= 5) {
+        setStatus("Excellent, 5/5 coordonnées trouvées.", "good");
+        maybeComplete(null);
+      } else {
+        ctx.targetSq = ctx.targets[ctx.progress];
+        setStatus(`Bien joué (${ctx.progress}/5). Trouve: ${ctx.targetSq}`, "good");
+      }
+    } else {
+      setStatus(`Presque. Cherche ${ctx.targetSq}.`, "bad");
+    }
     return;
   }
 
   const p = pieceAt(state, sq);
 
   if (selectedSq && sq !== selectedSq) {
-    const mv = legalMovesFromSelected.find((m) => m.to === sq);
-    if (!mv) {
+    const candidates = legalMovesFromSelected.filter((m) => m.to === sq);
+    if (!candidates.length) {
       toast(toastEl, "Coup illégal.");
       setStatus("Coup illégal.", "bad");
       return;
     }
 
-    animateMoveDOM(mv.from, mv.to);
-    state = makeMove(state, { ...mv });
+    chooseMoveForTarget(candidates).then((mv) => {
+      if (!mv) return;
+      animateMoveDOM(mv.from, mv.to);
+      state = makeMove(state, { ...mv });
 
-    setTimeout(() => {
-      clearSelection();
-      renderBoard();
-      toast(toastEl, `${mv.from}→${mv.to}`);
-      maybeComplete(mv);
-    }, 0);
+      setTimeout(() => {
+        clearSelection();
+        renderBoard();
+        toast(toastEl, `${mv.from}→${mv.to}`);
+        maybeComplete(mv);
+      }, 0);
+    });
     return;
   }
 
@@ -1021,8 +1104,8 @@ document.addEventListener("pointerup", (e) => {
     return;
   }
 
-  const mv = moves.find((m) => m.to === toSq);
-  if (!mv) {
+  const candidates = moves.filter((m) => m.to === toSq);
+  if (!candidates.length) {
     toast(toastEl, "Drop illégal.");
     setStatus("Coup illégal.", "bad");
     clearSelection();
@@ -1031,15 +1114,18 @@ document.addEventListener("pointerup", (e) => {
     return;
   }
 
-  animateMoveDOM(mv.from, mv.to);
-  state = makeMove(state, { ...mv });
+  chooseMoveForTarget(candidates).then((mv) => {
+    if (!mv) return;
+    animateMoveDOM(mv.from, mv.to);
+    state = makeMove(state, { ...mv });
 
-  setTimeout(() => {
-    clearSelection();
-    renderBoard();
-    toast(toastEl, `${mv.from}→${mv.to}`);
-    maybeComplete(mv);
-  }, 0);
+    setTimeout(() => {
+      clearSelection();
+      renderBoard();
+      toast(toastEl, `${mv.from}→${mv.to}`);
+      maybeComplete(mv);
+    }, 0);
+  });
 
   dragging = null;
 });
