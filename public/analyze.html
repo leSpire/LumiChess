@@ -2,56 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0; url=analysis.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>L'éliteChess — Analyse avancée</title>
-  <link rel="stylesheet" href="assets/css/app.css" />
+  <title>LumiChess — redirection analyse</title>
+  <link rel="canonical" href="analysis.html" />
 </head>
 <body>
-  <main class="analysis-page">
-    <section class="analysis-grid">
-      <aside class="analysis-left">
-        <div id="evalBar"></div>
-      </aside>
-      <section class="analysis-center">
-        <div class="analysis-top-controls">
-          <button id="flipBtn" class="btn ghost">Flip</button>
-          <button id="backBtn" class="btn ghost">◀</button>
-          <button id="resetBtn" class="btn ghost">Reset</button>
-          <button id="playPauseBtn" class="btn primary">Pause</button>
-          <button id="restartBtn" class="btn ghost">Relancer</button>
-          <span id="engineState">loading</span>
-        </div>
-        <div id="analysisBoard" class="analysis-board"></div>
-        <div id="analysisStatus" class="status"></div>
-      </section>
-      <aside class="analysis-right">
-        <h3>Best moves</h3>
-        <div id="bestMoves" class="best-moves"></div>
-        <h3>Engine info</h3>
-        <div id="engineInfo" class="engine-info">-</div>
-        <h3>Moves</h3>
-        <div id="moveList" class="move-list"></div>
-      </aside>
-    </section>
-
-    <section class="analysis-imports">
-      <label>FEN</label>
-      <textarea id="fenInput" rows="2"></textarea>
-      <button id="fenImportBtn" class="btn ghost">Importer FEN</button>
-      <label>PGN</label>
-      <textarea id="pgnInput" rows="4"></textarea>
-      <button id="pgnImportBtn" class="btn ghost">Importer PGN</button>
-    </section>
-
-    <section class="analysis-settings">
-      <label>Depth <input id="depthInput" type="number" value="18" min="1" max="50" /></label>
-      <label>MoveTime(ms) <input id="moveTimeInput" type="number" value="1200" min="0" max="10000" /></label>
-      <label>MultiPV <select id="multiPvInput"><option>1</option><option>2</option><option selected>3</option><option>5</option></select></label>
-      <label>Hash <input id="hashInput" type="number" value="128" min="16" max="2048" /></label>
-      <label>Threads <input id="threadsInput" type="number" value="2" min="1" max="16" /></label>
-      <label>WDL <input id="wdlInput" type="checkbox" /></label>
-    </section>
-  </main>
-  <script type="module" src="assets/js/analysis-entry.js"></script>
+  <p>Redirection vers l'analyse… <a href="analysis.html">Ouvrir l'analyse</a></p>
 </body>
 </html>

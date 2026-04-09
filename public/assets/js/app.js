@@ -690,7 +690,7 @@ openBasicsCard?.addEventListener("click", () => {
   openTutorial();
 });
 openAnalyzeBtn?.addEventListener("click", () => {
-  window.location.href = "analyze.html";
+  window.location.href = "analysis.html";
 });
 closeOverlayBtn?.addEventListener("click", closeTutorial);
 
