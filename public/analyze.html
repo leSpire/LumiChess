@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LumiChess — Analyse</title>
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.4.0/cjs/chess.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand__mark" aria-hidden="true">♞</div>
+        <div class="brand__text">
+          <div class="brand__title">LumiChess</div>
+          <div class="brand__sub">Apprends. Grind. Mate.</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav__item glow" onclick="window.location.href='index.html'"><span class="nav__icon">🎯</span><span class="nav__label">S'entraîner</span></button>
+        <button class="nav__item is-active glow"><span class="nav__icon">♟️</span><span class="nav__label">Analyse</span></button>
+        <button class="nav__item glow"><span class="nav__icon">📈</span><span class="nav__label">Progression</span></button>
+        <button class="nav__item glow"><span class="nav__icon">👤</span><span class="nav__label">Profil</span></button>
+        <button class="nav__item glow"><span class="nav__icon">⭐</span><span class="nav__label">Prenium</span></button>
+        <button class="nav__item glow"><span class="nav__icon">👥</span><span class="nav__label">Communauté</span></button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar__spacer"></div>
+        <div class="search glow"><span class="search__icon">🔎</span><input placeholder="Rechercher une leçon..." /></div>
+      </header>
+
+      <section class="analysis-layout">
+        <div class="analysis-hero glow">
+          <h1 class="hero__title">Mode <span class="accent">Analyse</span></h1>
+          <p class="hero__subtitle">Échiquier custom (DOM + CSS transforms), drag-and-drop, animation de coups et logique séparée.</p>
+          <div class="analysis-controls">
+            <button id="undoBtn" class="btn ghost glow">Annuler</button>
+            <button id="flipBtn" class="btn ghost glow">Retourner</button>
+            <button id="resetBtn" class="btn primary glow">Nouvelle partie</button>
+          </div>
+          <div class="status" id="analysisStatus">Au tour des Blancs</div>
+        </div>
+        <div class="analysis-board-card glow">
+          <div class="analysis-board" id="analysisBoard"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="assets/js/analyze-board.js"></script>
+</body>
+</html>
