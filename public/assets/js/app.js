@@ -544,6 +544,7 @@ const isStandaloneTutorial = Boolean(tutorialPage);
 
 const openTutorialBtn = $("#openTutorialBtn");
 const openBasicsCard = $("#openBasicsCard");
+const openAnalyzeBtn = $("#openAnalyzeBtn");
 const closeOverlayBtn = $("#closeOverlay");
 
 const prevBtn = $("#prevBtn");
@@ -687,6 +688,9 @@ openTutorialBtn?.addEventListener("click", () => {
 });
 openBasicsCard?.addEventListener("click", () => {
   openTutorial();
+});
+openAnalyzeBtn?.addEventListener("click", () => {
+  window.location.href = "analyze.html";
 });
 closeOverlayBtn?.addEventListener("click", closeTutorial);
 
