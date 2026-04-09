@@ -29,6 +29,18 @@ export class LeLiteChessBoard {
     setPosition(fen) {
         this.state.setPosition(fen);
     }
+    snapshot() {
+        return this.state.snapshot();
+    }
+    subscribe(listener) {
+        return this.state.subscribe(listener);
+    }
+    goTo(index) {
+        this.state.goTo(index);
+    }
+    undo() {
+        this.state.undo();
+    }
     move(from, to, options) {
         const result = this.state.move(from, to, options);
         if (result)
