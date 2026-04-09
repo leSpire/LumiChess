@@ -1306,3 +1306,68 @@ body{
   .analysis-layout{ grid-template-columns:1fr; }
   .analysis-board{ width:100%; max-width:640px; margin:0 auto; }
 }
+
+/* EliteChess modern board */
+.analysis-board {
+  position: relative;
+  width: min(92vw, 760px);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  touch-action: none;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.ec-board {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  background: #1f232d;
+}
+.ec-layer { position: absolute; inset: 0; }
+.ec-square,
+.ec-piece {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+.ec-square[data-tone="light"] { background: #f0d9b5; }
+.ec-square[data-tone="dark"] { background: #b58863; }
+.ec-square.is-selected { box-shadow: inset 0 0 0 3px rgba(84, 164, 255, 0.85); }
+.ec-square.is-legal::after {
+  content: "";
+  position: absolute;
+  inset: 38%;
+  border-radius: 999px;
+  background: rgba(20, 30, 48, 0.4);
+}
+.ec-square.is-last-move { background: #dfe97a; }
+.ec-square.is-check { box-shadow: inset 0 0 0 3px rgba(255, 82, 82, 0.9); }
+.ec-piece {
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  cursor: grab;
+  will-change: transform;
+}
+.ec-piece-svg { width: 88%; height: 88%; pointer-events: none; }
+.ec-piece-ghost {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+  z-index: 8;
+  pointer-events: none;
+}
+.ec-animating { transition: transform 140ms cubic-bezier(.2,.8,.2,1); }
+.ec-layer-coordinates { pointer-events: none; z-index: 5; color: rgba(17, 24, 39, 0.72); font-weight: 700; }
+.ec-file-label { position: absolute; left: 1%; bottom: 0.5%; width: 12.5%; font-size: clamp(10px, 1.5vw, 12px); }
+.ec-rank-label { position: absolute; right: 1.2%; top: 1%; height: 12.5%; font-size: clamp(10px, 1.5vw, 12px); }
+
+@media (max-width: 900px) {
+  .analysis-layout { grid-template-columns: 1fr; }
+  .analysis-board { width: min(94vw, 520px); }
+}
