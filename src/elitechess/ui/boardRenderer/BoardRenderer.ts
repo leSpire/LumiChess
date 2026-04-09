@@ -30,6 +30,8 @@ export class BoardRenderer {
     this.coordinatesLayer.className = "ec-layer ec-layer-coordinates";
     this.root.append(this.squaresLayer, this.piecesLayer, this.coordinatesLayer);
     this.mountStaticSquares();
+    this.root.dataset.squareCount = `${this.squares.size}`;
+    this.root.classList.add("ec-board-ready");
     this.renderCoordinates();
   }
 
