@@ -39,3 +39,37 @@ export interface GameStatus {
   draw: boolean;
   turn: "w" | "b";
 }
+
+export interface MoveNode {
+  ply: number;
+  fen: string;
+  san: string;
+  lan: string;
+  turn: "w" | "b";
+}
+
+export interface PgnVariationState {
+  rootFen: string;
+  currentIndex: number;
+  moves: MoveNode[];
+  source: "manual" | "pgn";
+}
+
+export type EngineLifecycle = "loading" | "ready" | "analysing" | "stopped" | "error";
+
+export interface ScoreModel {
+  kind: "cp" | "mate";
+  value: number;
+  pov: "w" | "b";
+}
+
+export interface AnalysisLine {
+  multipv: number;
+  depth: number;
+  seldepth: number;
+  nodes: number;
+  nps: number;
+  hashfull: number;
+  score: ScoreModel;
+  pv: string[];
+}

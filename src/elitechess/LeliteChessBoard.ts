@@ -37,6 +37,22 @@ export class LeLiteChessBoard implements LeLiteChessBoardApi {
     this.state.setPosition(fen);
   }
 
+  snapshot(): ReturnType<GameStateEngine["snapshot"]> {
+    return this.state.snapshot();
+  }
+
+  subscribe(listener: (snapshot: ReturnType<GameStateEngine["snapshot"]>) => void): () => void {
+    return this.state.subscribe(listener);
+  }
+
+  goTo(index: number): void {
+    this.state.goTo(index);
+  }
+
+  undo(): void {
+    this.state.undo();
+  }
+
   move(from: Square, to: Square, options?: { promotion?: "q" | "r" | "b" | "n" }): MoveResult | null {
     const result = this.state.move(from, to, options);
     if (result) this.sync.publishMove(result);
