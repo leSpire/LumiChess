@@ -4,7 +4,7 @@ import { AnalysisPanel } from "../../ui/analysisPanel/AnalysisPanel.js";
 import { EvalBar } from "../../ui/evalBar/EvalBar.js";
 import { MoveList } from "../../ui/moveList/MoveList.js";
 
-const START_FEN = "rn1qkbnr/ppp2ppp/3pp3/8/2BPP3/5N2/PPP2PPP/RNBQK2R b KQkq - 0 4";
+const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export class AnalysisController {
   private readonly board: LeLiteChessBoard;
