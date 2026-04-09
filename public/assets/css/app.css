@@ -1262,45 +1262,6 @@ body{
   border:1px solid rgba(255,255,255,.12);
   background:#241a14;
 }
-.board-layer{ position:absolute; inset:0; }
-.sq,.piece{
-  position:absolute;
-  width:12.5%;
-  height:12.5%;
-  border:0;
-}
-.sq.light{ background:#efdabc; }
-.sq.dark{ background:#b88962; }
-.sq.is-selected{ box-shadow: inset 0 0 0 4px rgba(202,160,122,.95); }
-.sq.is-legal::after{
-  content:"";
-  position:absolute;
-  inset:36%;
-  border-radius:50%;
-  background: rgba(15,15,15,.28);
-}
-.sq.is-last{ box-shadow: inset 0 0 0 999px rgba(202,160,122,.22); }
-.pieces{ pointer-events:none; }
-.piece{
-  display:grid;
-  place-items:center;
-  font-size: clamp(28px, 4.2vw, 46px);
-  background:transparent;
-  pointer-events:auto;
-  cursor:grab;
-  transition: transform 180ms cubic-bezier(.2,.9,.2,1);
-  filter: drop-shadow(0 6px 8px rgba(0,0,0,.34));
-}
-.piece.animated{ transition-duration: 220ms; }
-.piece.dragging{
-  width:12.5%;
-  height:12.5%;
-  position:absolute;
-  z-index:50;
-  pointer-events:none;
-  cursor:grabbing;
-  transition:none;
-}
 
 @media (max-width: 1100px){
   .analysis-layout{ grid-template-columns:1fr; }
@@ -1384,21 +1345,8 @@ body{
   min-height: 320px;
   border: 1px solid rgba(255,255,255,.18);
   box-shadow: 0 14px 38px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.05);
-  background: #1e1612;
+  background: transparent;
 }
-.analysis-board::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(45deg, rgba(239,218,188,.92) 25%, transparent 25%, transparent 75%, rgba(239,218,188,.92) 75%),
-    linear-gradient(45deg, rgba(184,137,98,.92) 25%, transparent 25%, transparent 75%, rgba(184,137,98,.92) 75%);
-  background-size: 25% 25%;
-  background-position: 0 0, 12.5% 12.5%;
-  opacity: .28;
-  pointer-events: none;
-}
-.analysis-board.ec-board-ready::before { opacity: 0; }
 .analysis-right, .analysis-imports, .analysis-settings, .analysis-top-controls { background: rgba(0,0,0,.24); border: 1px solid var(--stroke2); border-radius: 12px; padding: 10px; }
 .analysis-top-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
 .ec-evalbar { position: relative; width: 54px; height: min(78vw, 680px); border-radius: 999px; border: 1px solid var(--stroke2); background: linear-gradient(#f8f8f8,#111); overflow: hidden; }

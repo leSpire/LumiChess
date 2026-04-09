@@ -25,6 +25,7 @@ export class AnalysisController {
     this.board.setPosition(START_FEN);
     this.bindUi();
     this.bindEngine();
+    this.restartAnalysis();
   }
 
   private bindUi(): void {
