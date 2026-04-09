@@ -24,6 +24,7 @@ export class AnalysisController {
         this.board.setPosition(START_FEN);
         this.bindUi();
         this.bindEngine();
+        this.restartAnalysis();
     }
     bindUi() {
         this.required("flipBtn").addEventListener("click", () => this.board.flip());
