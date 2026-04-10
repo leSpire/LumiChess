@@ -544,7 +544,6 @@ const isStandaloneTutorial = Boolean(tutorialPage);
 
 const openTutorialBtn = $("#openTutorialBtn");
 const openBasicsCard = $("#openBasicsCard");
-const openAnalyzeBtn = $("#openAnalyzeBtn");
 const closeOverlayBtn = $("#closeOverlay");
 
 const prevBtn = $("#prevBtn");
@@ -688,9 +687,6 @@ openTutorialBtn?.addEventListener("click", () => {
 });
 openBasicsCard?.addEventListener("click", () => {
   openTutorial();
-});
-openAnalyzeBtn?.addEventListener("click", () => {
-  window.location.href = "analysis.html";
 });
 closeOverlayBtn?.addEventListener("click", closeTutorial);
 
@@ -1239,161 +1235,6 @@ function moveGhost(x, y) {
   dragging.ghostEl.style.left = `${x}px`;
   dragging.ghostEl.style.top = `${y}px`;
 }
-
-let miniState = startPosition();
-let miniSelectedSq = null;
-let miniDragging = null;
-
-function setMiniStatus(message) {
-  const statusElMini = $("#miniBoardStatus");
-  if (statusElMini) statusElMini.textContent = message;
-}
-
-function clearMiniSelection() {
-  miniSelectedSq = null;
-}
-
-function renderMiniBoard() {
-  const mini = $("#miniBoard");
-  if (!mini) return;
-
-  mini.innerHTML = "";
-
-  for (let i = 0; i < 8; i += 1) {
-    for (let j = 0; j < 8; j += 1) {
-      const sq = ijToSq(i, j);
-      const p = miniState.board[i][j];
-      const dark = (i + j) % 2 === 1;
-
-      const cell = document.createElement("button");
-      cell.type = "button";
-      cell.className = `miniSq ${dark ? "dark" : "light"}`;
-      cell.dataset.sq = sq;
-      cell.setAttribute("aria-label", `Case ${sq}`);
-
-      if (miniSelectedSq === sq) {
-        cell.classList.add("is-selected");
-      }
-
-      if (miniSelectedSq) {
-        const legalTargets = genLegalMoves(miniState, miniSelectedSq);
-        const m = legalTargets.find((mv) => mv.to === sq);
-        if (m) {
-          const targetPiece = pieceAt(miniState, sq);
-          cell.classList.add(targetPiece ? "is-capture" : "is-target");
-        }
-      }
-
-      if (p) {
-        const pe = document.createElement("span");
-        pe.className = `miniPiece ${colorOf(p) === "w" ? "w" : "b"}`;
-        pe.textContent = U[p] || "";
-        pe.dataset.sq = sq;
-        pe.addEventListener("pointerdown", onMiniPiecePointerDown);
-        cell.appendChild(pe);
-      }
-
-      cell.addEventListener("click", () => onMiniSquareClick(sq));
-      mini.appendChild(cell);
-    }
-  }
-
-  const turnLabel = miniState.turn === "w" ? "Trait aux blancs" : "Trait aux noirs";
-  setMiniStatus(miniSelectedSq ? `${turnLabel} · ${miniSelectedSq} sélectionnée` : turnLabel);
-}
-
-function onMiniSquareClick(sq) {
-  const p = pieceAt(miniState, sq);
-
-  if (miniSelectedSq && miniSelectedSq !== sq) {
-    const move = genLegalMoves(miniState, miniSelectedSq).find((m) => m.to === sq);
-    if (move) {
-      miniState = makeMove(miniState, { ...move });
-      clearMiniSelection();
-      renderMiniBoard();
-      return;
-    }
-  }
-
-  if (p && colorOf(p) === miniState.turn) {
-    miniSelectedSq = sq;
-  } else {
-    clearMiniSelection();
-  }
-
-  renderMiniBoard();
-}
-
-function resetMiniBoard() {
-  miniState = startPosition();
-  clearMiniSelection();
-  renderMiniBoard();
-}
-
-function onMiniPiecePointerDown(e) {
-  const fromSq = e.currentTarget.dataset.sq;
-  const p = pieceAt(miniState, fromSq);
-  if (!p || colorOf(p) !== miniState.turn) return;
-
-  e.preventDefault();
-
-  miniSelectedSq = fromSq;
-  const moves = genLegalMoves(miniState, fromSq);
-  renderMiniBoard();
-
-  const ghost = document.createElement("div");
-  ghost.className = "miniDragGhost";
-  ghost.textContent = e.currentTarget.textContent;
-  ghost.style.color = getComputedStyle(e.currentTarget).color;
-  document.body.appendChild(ghost);
-
-  miniDragging = { fromSq, ghost, moves };
-  moveMiniGhost(e.clientX, e.clientY);
-}
-
-document.addEventListener("pointermove", (e) => {
-  if (!miniDragging) return;
-  moveMiniGhost(e.clientX, e.clientY);
-});
-
-document.addEventListener("pointerup", (e) => {
-  if (!miniDragging) return;
-
-  const { moves, ghost } = miniDragging;
-  ghost.remove();
-
-  const under = document.elementFromPoint(e.clientX, e.clientY);
-  const sqEl = under?.closest?.(".miniSq");
-  const toSq = sqEl?.dataset?.sq || null;
-
-  if (!toSq) {
-    miniDragging = null;
-    clearMiniSelection();
-    renderMiniBoard();
-    return;
-  }
-
-  const mv = moves.find((m) => m.to === toSq);
-  if (!mv) {
-    miniDragging = null;
-    clearMiniSelection();
-    renderMiniBoard();
-    return;
-  }
-
-  miniState = makeMove(miniState, { ...mv });
-  miniDragging = null;
-  clearMiniSelection();
-  renderMiniBoard();
-});
-
-function moveMiniGhost(x, y) {
-  miniDragging.ghost.style.left = `${x}px`;
-  miniDragging.ghost.style.top = `${y}px`;
-}
-
-$("#miniBoardReset")?.addEventListener("click", resetMiniBoard);
-renderMiniBoard();
 
 (() => {
   const hv = $("#heroVisual");
