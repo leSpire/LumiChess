@@ -3,51 +3,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LeliteChess — Analyse</title>
+  <title>Échecs Académie — Analyse</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" />
   <link rel="stylesheet" href="assets/css/analysis.css" />
 </head>
 <body>
   <main class="analysis-shell">
-    <header class="analysis-header">
-      <div class="analysis-tabs">
-        <button class="tab is-active">Analyse</button>
-        <button class="tab">Explorateur</button>
-        <button class="tab">Parties</button>
+    <header class="topbar">
+      <div class="logo-wrap">
+        <span class="logo-mark">♞</span>
+        <div>
+          <h1>Échecs <span>Académie</span></h1>
+        </div>
       </div>
-      <div class="brand">LeliteChess</div>
+      <div class="top-actions">
+        <button class="icon-btn" aria-label="Recherche">⌕</button>
+        <button class="icon-btn" aria-label="Réglages">⚙</button>
+      </div>
     </header>
 
-    <section class="analysis-content">
-      <section class="board-panel">
-        <div class="panel-head">
+    <section class="workspace">
+      <section class="board-column panel-glass">
+        <div class="player-row">
           <div class="player-card">Noirs</div>
           <div class="player-card">IA Stockfish</div>
         </div>
-        <div id="analysisBoard" class="analysis-board"></div>
-        <div class="board-controls">
-          <button id="newGameBtn">Nouvelle partie</button>
-          <button id="flipBtn">Retourner</button>
-          <button id="undoBtn">Annuler</button>
-          <button id="connectBtn">Connexion live</button>
+
+        <div class="board-wrap">
+          <div class="eval-bar-wrap">
+            <div id="evalBarFill" class="eval-fill"></div>
+            <span id="evalBarText" class="eval-bar-text">+0.0</span>
+          </div>
+          <div id="analysisBoard" class="analysis-board"></div>
         </div>
-        <p id="analysisStatus" class="status"></p>
+
+        <p id="analysisStatus" class="status">Échiquier interactif prêt.</p>
+
+        <div class="transport">
+          <button id="newGameBtn" class="transport-btn">Nouvelle analyse</button>
+          <div class="nav-buttons">
+            <button id="firstBtn" class="transport-btn">|◀</button>
+            <button id="prevBtn" class="transport-btn">◀</button>
+            <button id="playBtn" class="transport-btn">▶</button>
+            <button id="nextBtn" class="transport-btn">▶|</button>
+            <button id="lastBtn" class="transport-btn">|▶</button>
+          </div>
+          <div class="right-actions">
+            <button id="flipBtn" class="transport-btn">Retourner</button>
+            <button id="undoBtn" class="transport-btn">Annuler</button>
+            <button id="connectBtn" class="transport-btn">Live</button>
+          </div>
+        </div>
       </section>
 
-      <aside class="side-panel">
-        <h2 id="evalTitle">Évaluation: égalité</h2>
-        <div id="gameState" class="state-chip">Trait aux blancs</div>
-        <div class="moves-wrap">
+      <aside class="analysis-column panel-glass">
+        <div class="tabs">
+          <button class="tab is-active">Analyse</button>
+          <button class="tab">Explorateur</button>
+          <button class="tab">Parties</button>
+        </div>
+
+        <section class="eval-panel">
+          <h2 id="evalTitle">+0.00 <span>Niveau 20 · Évaluation</span></h2>
+          <div class="line-grid" id="lineGrid"></div>
+          <p id="openingLabel" class="opening">Ouverture · Position initiale</p>
+          <div class="tags">
+            <span>Recommandé ✓</span>
+            <span>Coup fort 👍</span>
+          </div>
+        </section>
+
+        <section class="moves-panel">
           <h3>Historique des coups</h3>
-          <ol id="moveList"></ol>
-        </div>
-        <div class="legend">
-          <p>✔ Mouvements légaux</p>
-          <p>✔ Échec / mat</p>
-          <p>✔ Roque, en passant, promotion</p>
-          <p>✔ Drag & drop + sons</p>
-          <p>✔ WebSocket prêt (optionnel)</p>
-        </div>
+          <ol id="moveList" class="move-list"></ol>
+          <p id="gameState" class="state-chip">Trait aux blancs</p>
+        </section>
       </aside>
     </section>
   </main>
