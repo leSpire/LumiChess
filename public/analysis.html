@@ -3,55 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>L'éliteChess — Analyse avancée</title>
-  <link rel="stylesheet" href="assets/css/app.css" />
+  <title>LeliteChess — Analyse</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css" />
+  <link rel="stylesheet" href="assets/css/analysis.css" />
 </head>
 <body>
-  <main class="analysis-page">
-    <section class="analysis-grid">
-      <aside class="analysis-left">
-        <div id="evalBar"></div>
-      </aside>
-      <section class="analysis-center">
-        <div class="analysis-top-controls">
-          <button id="flipBtn" class="btn ghost">Flip</button>
-          <button id="backBtn" class="btn ghost">◀</button>
-          <button id="resetBtn" class="btn ghost">Reset</button>
-          <button id="playPauseBtn" class="btn primary">Pause</button>
-          <button id="restartBtn" class="btn ghost">Relancer</button>
-          <span id="engineState">loading</span>
+  <main class="analysis-shell">
+    <header class="analysis-header">
+      <div class="analysis-tabs">
+        <button class="tab is-active">Analyse</button>
+        <button class="tab">Explorateur</button>
+        <button class="tab">Parties</button>
+      </div>
+      <div class="brand">LeliteChess</div>
+    </header>
+
+    <section class="analysis-content">
+      <section class="board-panel">
+        <div class="panel-head">
+          <div class="player-card">Noirs</div>
+          <div class="player-card">IA Stockfish</div>
         </div>
         <div id="analysisBoard" class="analysis-board"></div>
-        <div id="analysisStatus" class="status"></div>
+        <div class="board-controls">
+          <button id="newGameBtn">Nouvelle partie</button>
+          <button id="flipBtn">Retourner</button>
+          <button id="undoBtn">Annuler</button>
+          <button id="connectBtn">Connexion live</button>
+        </div>
+        <p id="analysisStatus" class="status"></p>
       </section>
-      <aside class="analysis-right">
-        <h3>Best moves</h3>
-        <div id="bestMoves" class="best-moves"></div>
-        <h3>Engine info</h3>
-        <div id="engineInfo" class="engine-info">-</div>
-        <h3>Moves</h3>
-        <div id="moveList" class="move-list"></div>
+
+      <aside class="side-panel">
+        <h2 id="evalTitle">Évaluation: égalité</h2>
+        <div id="gameState" class="state-chip">Trait aux blancs</div>
+        <div class="moves-wrap">
+          <h3>Historique des coups</h3>
+          <ol id="moveList"></ol>
+        </div>
+        <div class="legend">
+          <p>✔ Mouvements légaux</p>
+          <p>✔ Échec / mat</p>
+          <p>✔ Roque, en passant, promotion</p>
+          <p>✔ Drag & drop + sons</p>
+          <p>✔ WebSocket prêt (optionnel)</p>
+        </div>
       </aside>
     </section>
-
-    <section class="analysis-imports">
-      <label>FEN</label>
-      <textarea id="fenInput" rows="2"></textarea>
-      <button id="fenImportBtn" class="btn ghost">Importer FEN</button>
-      <label>PGN</label>
-      <textarea id="pgnInput" rows="4"></textarea>
-      <button id="pgnImportBtn" class="btn ghost">Importer PGN</button>
-    </section>
-
-    <section class="analysis-settings">
-      <label>Depth <input id="depthInput" type="number" value="18" min="1" max="50" /></label>
-      <label>MoveTime(ms) <input id="moveTimeInput" type="number" value="1200" min="0" max="10000" /></label>
-      <label>MultiPV <select id="multiPvInput"><option>1</option><option>2</option><option selected>3</option><option>5</option></select></label>
-      <label>Hash <input id="hashInput" type="number" value="128" min="16" max="2048" /></label>
-      <label>Threads <input id="threadsInput" type="number" value="2" min="1" max="16" /></label>
-      <label>WDL <input id="wdlInput" type="checkbox" /></label>
-    </section>
   </main>
-  <script type="module" src="assets/js/analysis-entry.js"></script>
+
+  <audio id="moveSound" preload="auto" src="https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-self.mp3"></audio>
+  <audio id="captureSound" preload="auto" src="https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3"></audio>
+  <audio id="checkSound" preload="auto" src="https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-check.mp3"></audio>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+  <script src="assets/js/analysis-ui.js"></script>
 </body>
 </html>
